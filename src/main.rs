@@ -3,9 +3,7 @@ use std::process;
 
 
 fn main() {
-    let args = env::args();
-
-    match args.skip(1).next() {
+    match env::args().skip(1).next() {
         Some(command) => match command.as_ref() {
             "init" => println!("running init..."),
             "add" => println!("running add..."),
