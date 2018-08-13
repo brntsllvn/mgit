@@ -17,3 +17,4 @@
   - `reset` Reset current HEAD to the specified state
   - #### Stretch
   - `remote`, `pull` Fetch from and integrate with another repository or a local branch
+  - `branch` List, create, or delete branches
