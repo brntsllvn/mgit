@@ -1,6 +1,31 @@
 use std::env;
 use std::process;
 
+pub trait Command {
+    fn execute(&self) -> String;
+}
+
+pub struct EmptyCommand;
+
+impl Command for EmptyCommand {
+    fn execute(&self) -> String {
+        let default = "
+command        Description
+----------------------------------------------
+init           Create an empty Git repository
+add            Add file contents to the index
+commit         Record changes to the repository
+";
+
+        println!("{}", default);
+
+        default.to_string()
+    }
+}
+
+// InitCommand.execute...returns "Initialized empty git repo"
+// AddCommand.execute...returns ""
+// CommitCommand.execute...returns "SHA-1"
 
 fn main() {
     match env::args().skip(1).next() {
@@ -11,24 +36,8 @@ fn main() {
             _ => println!("something went wrong: unrecognized command")
         },
         None => {
-            println!("printing default stuff");
+            EmptyCommand.execute();
             process::exit(0);
         }
     };
 }
-
-
-//    let default_output = vec!(
-//        "command        Description".to_string(),
-//        "----------------------------------------------".to_string(),
-//        "init           Create an empty Git repository".to_string(),
-//        "add            Add file contents to the index".to_string(),
-//        "commit         Record changes to the repository".to_string()
-//    );
-
-
-
-
-// accept command line args
-// determine which struct (default, init, add, commit) to use (ideally make the return type an abstraction)
-// create the struct
