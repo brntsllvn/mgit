@@ -6,7 +6,7 @@ pub mod commit;
 pub mod missing;
 
 pub trait Command {
-    fn execute(&self, args: env::Args) -> String;
+    fn execute(&self, args: Vec<String>) -> String;
 }
 
 pub fn get_command(param: Option<String>) -> Box<Command> {

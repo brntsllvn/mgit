@@ -5,7 +5,7 @@ use std::fs;
 pub struct InitCommand;
 
 impl Command for InitCommand {
-    fn execute(&self, mut args: env::Args) -> String {
+    fn execute(&self, args: Vec<String>) -> String {
 
 //        fs::create_dir("./.mgit");
 //        fs::create_dir("./.mgit/objects");
