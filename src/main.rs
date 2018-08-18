@@ -16,7 +16,6 @@ fn main() {
         },
         None => commands::empty::EmptyCommand.execute(args)
     };
-    println!();
-    println!("{}", result);
-    println!();
+
+    println!("\n{}\n", result);
 }
