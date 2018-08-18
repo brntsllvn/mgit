@@ -1,7 +1,7 @@
 use std::env;
 
 mod commands;
-use commands::Command;
+use commands::*;
 
 fn main() {
     let mut args = env::args();
@@ -14,7 +14,7 @@ fn main() {
             "commit" => commands::CommitCommand.execute(args),
             _ => commands::MissingCommand.execute(args)
         },
-        None => commands::EmptyCommand.execute(args)
+        None => commands::empty::EmptyCommand.execute(args)
     };
     println!("{}", result);
 }
