@@ -1,5 +1,4 @@
 use std::env;
-use std::process;
 
 mod commands;
 use commands::Command;
@@ -8,19 +7,14 @@ fn main() {
     let mut args = env::args();
     let _filepath = args.next();
     let command = args.next();
-    match command {
+    let result = match command {
         Some(cmd) => match cmd.as_ref() {
             "init" => commands::InitCommand.execute(args),
             "add" => commands::AddCommand.execute(args),
             "commit" => commands::CommitCommand.execute(args),
-            _ => {
-                commands::MissingCommand.execute(args);
-                process::exit(-1);
-            }
+            _ => commands::MissingCommand.execute(args)
         },
-        None => {
-            commands::EmptyCommand.execute(args);
-            process::exit(0);
-        }
+        None => commands::EmptyCommand.execute(args)
     };
+    println!("{}", result);
 }

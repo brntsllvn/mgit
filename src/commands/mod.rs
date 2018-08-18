@@ -1,21 +1,18 @@
 use std::env;
 
 pub trait Command {
-    fn execute(&self, args: env::Args) -> String;
+    fn execute(&self, mut args: env::Args) -> String;
 }
 
 pub struct EmptyCommand;
 
 impl Command for EmptyCommand {
-    fn execute(&self, args: env::Args) -> String {
-        let default = "
-command        Description
+    fn execute(&self, mut args: env::Args) -> String {
+        let default = "command        Description
 ----------------------------------------------
 init           Create an empty Git repository
 add            Add file contents to the index
-commit         Record changes to the repository
-    ";
-        println!("{}", default);
+commit         Record changes to the repository";
         default.to_string()
     }
 }
@@ -23,10 +20,9 @@ commit         Record changes to the repository
 pub struct InitCommand;
 
 impl Command for InitCommand {
-    fn execute(&self, args: env::Args) -> String {
+    fn execute(&self, mut args: env::Args) -> String {
         // implementation goes here
         let msg = "Initialized empty git repo".to_string();
-        println!("{}", msg);
         msg
     }
 }
@@ -34,10 +30,9 @@ impl Command for InitCommand {
 pub struct AddCommand;
 
 impl Command for AddCommand {
-    fn execute(&self, args: env::Args) -> String {
+    fn execute(&self, mut args: env::Args) -> String {
         // implementation goes here
         let msg = "Index updated".to_string();
-        println!("{}", msg);
         msg
     }
 }
@@ -45,10 +40,9 @@ impl Command for AddCommand {
 pub struct CommitCommand;
 
 impl Command for CommitCommand {
-    fn execute(&self, args: env::Args) -> String {
+    fn execute(&self, mut args: env::Args) -> String {
         // implementation goes here
         let msg = "Committed...".to_string();
-        println!("{}", msg);
         msg // SHA-1
     }
 }
@@ -56,9 +50,8 @@ impl Command for CommitCommand {
 pub struct MissingCommand;
 
 impl Command for MissingCommand {
-    fn execute(&self, args: env::Args) -> String {
-        let msg = "Not a recognized mgit command. See 'mgit' for help.".to_string();
-        println!("{}", msg);
-        msg
+    fn execute(&self, mut args: env::Args) -> String {
+        "mgit: unrecognized mgit command. See 'mgit' for help."
+            .to_string()
     }
 }
