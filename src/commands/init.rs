@@ -4,7 +4,7 @@ use commands::Command;
 pub struct InitCommand;
 
 impl Command for InitCommand {
-    fn execute(&self, mut args: env::Args) -> String {
+    fn execute(&self, args: Vec<String>) -> String {
 
         //////////////////////////////
         // implementation goes here //
