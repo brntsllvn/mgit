@@ -5,18 +5,21 @@ mod commands;
 use commands::Command;
 
 fn main() {
-    match env::args().skip(1).next() {
-        Some(command) => match command.as_ref() {
-            "init" => commands::InitCommand.execute(),
-            "add" => commands::AddCommand.execute(),
-            "commit" => commands::CommitCommand.execute(),
+    let mut args = env::args();
+    let _filepath = args.next();
+    let command = args.next();
+    match command {
+        Some(cmd) => match cmd.as_ref() {
+            "init" => commands::InitCommand.execute(args),
+            "add" => commands::AddCommand.execute(args),
+            "commit" => commands::CommitCommand.execute(args),
             _ => {
-                commands::MissingCommand.execute();
+                commands::MissingCommand.execute(args);
                 process::exit(-1);
             }
         },
         None => {
-            commands::EmptyCommand.execute();
+            commands::EmptyCommand.execute(args);
             process::exit(0);
         }
     };
