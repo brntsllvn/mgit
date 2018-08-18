@@ -4,10 +4,10 @@ mod commands;
 use commands::*;
 
 fn main() {
-    let mut args = env::args();
-    let _filepath = args.next();
-    let command = args.next();
-    let result = match command {
+    let mut args= env::args();
+    let _filepath= args.next();
+    let command= args.next();
+    let result= match command {
         Some(cmd) => match cmd.as_ref() {
             "init" => commands::init::InitCommand.execute(args),
             "add" => commands::add::AddCommand.execute(args),
@@ -16,5 +16,7 @@ fn main() {
         },
         None => commands::empty::EmptyCommand.execute(args)
     };
+    println!();
     println!("{}", result);
+    println!();
 }
