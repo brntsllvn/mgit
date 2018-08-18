@@ -9,10 +9,10 @@ fn main() {
     let command = args.next();
     let result = match command {
         Some(cmd) => match cmd.as_ref() {
-            "init" => commands::InitCommand.execute(args),
-            "add" => commands::AddCommand.execute(args),
-            "commit" => commands::CommitCommand.execute(args),
-            _ => commands::MissingCommand.execute(args)
+            "init" => commands::init::InitCommand.execute(args),
+            "add" => commands::add::AddCommand.execute(args),
+            "commit" => commands::commit::CommitCommand.execute(args),
+            _ => commands::missing::MissingCommand.execute(args)
         },
         None => commands::empty::EmptyCommand.execute(args)
     };
