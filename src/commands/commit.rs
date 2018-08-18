@@ -5,8 +5,11 @@ pub struct CommitCommand;
 
 impl Command for CommitCommand {
     fn execute(&self, mut args: env::Args) -> String {
-        // implementation goes here
-        let msg = "Committed...".to_string();
-        msg // SHA-1
+
+        //////////////////////////////
+        // implementation goes here //
+        //////////////////////////////
+
+        "Committed...".to_string() // SHA-1
     }
 }
