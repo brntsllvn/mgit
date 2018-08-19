@@ -1,4 +1,3 @@
-use std::env;
 use commands::Command;
 
 pub struct AddCommand;

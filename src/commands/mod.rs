@@ -1,4 +1,3 @@
-use std::env;
 pub mod empty;
 pub mod init;
 pub mod add;
