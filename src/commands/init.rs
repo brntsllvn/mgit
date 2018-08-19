@@ -1,4 +1,3 @@
-use std::env;
 use commands::Command;
 use std::fs;
 use std::fs::File;
@@ -8,15 +7,12 @@ pub struct InitCommand;
 
 impl Command for InitCommand {
     fn execute(&self, args: Vec<String>) -> String {
-
         fs::create_dir("./.mgit");
         fs::create_dir("./.mgit/objects");
         fs::create_dir("./.mgit/refs");
-
         "Initialized empty git repo".to_string()
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -24,40 +20,25 @@ mod tests {
 
     #[test]
     fn creates_mgit_db() {
+        let mgit_path = "./.mgit";
+        let obj_path = "./.mgit/objects";
+        let ref_path = "./.mgit/refs";
         let dummy_args = vec!["hi".to_string()];
-        let path = "./.mgit";
-        let command = InitCommand.execute(dummy_args);
-        let result = File::open(path);
-        match result {
-            Err(_) => panic!("dir does not exist"),
-            Ok(_) => println!("pass")
-        };
-        fs::remove_dir(path);
-    }
 
-    #[test]
-    fn creates_obj_dir() {
-        let dummy_args = vec!["hi".to_string()];
-        let path = "./.mgit/objects";
-        let command = InitCommand.execute(dummy_args);
-        let result = File::open(path);
-        match result {
-            Err(_) => panic!("dir does not exist"),
-            Ok(_) => println!("pass")
-        };
-        fs::remove_dir(path);
-    }
+        InitCommand.execute(dummy_args);
 
-    #[test]
-    fn creates_refs_dir() {
-        let dummy_args = vec!["hi".to_string()];
-        let path = "./.mgit/refs";
-        let command = InitCommand.execute(dummy_args);
-        let result = File::open(path);
-        match result {
-            Err(_) => panic!("dir does not exist"),
-            Ok(_) => println!("pass")
-        };
-        fs::remove_dir(path);
+        let results = vec![
+            File::open(mgit_path),
+            File::open(obj_path),
+            File::open(ref_path)
+        ];
+        for result in results {
+            match result {
+                Err(_) => panic!("dir does not exist"),
+                Ok(_) => ()
+            }
+        }
+
+        fs::remove_dir_all(mgit_path);
     }
 }
