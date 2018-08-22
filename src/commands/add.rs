@@ -75,17 +75,31 @@ mod tests {
     }
 
     #[test]
-    fn retrieve_index_contents_into_hashmap() {
+    fn retrieve_empty_index_into_hashmap() {
         let mgit_path = "./.mgit";
         fs::create_dir(mgit_path);
         let mut file = match File::create("./.mgit/index") {
             Ok(file) => file,
             Err(e) => panic!("{:?}", e)
         };
-//        match file.write_all(b"1,123\n2,222") {
-//            Err(_) => panic!("something else went wrong"),
-//            Ok(_) => ()
-//        };
+
+        let inode_to_meta = get_index_contents();
+
+        assert_eq!(inode_to_meta.get(&1), None);
+    }
+
+    #[test]
+    fn retrieve_populated_index_into_hashmap() {
+        let mgit_path = "./.mgit";
+        fs::create_dir(mgit_path);
+        let mut file = match File::create("./.mgit/index") {
+            Ok(file) => file,
+            Err(e) => panic!("{:?}", e)
+        };
+        match file.write_all(b"1,123\n2,222") {
+            Err(_) => panic!("something else went wrong"),
+            Ok(_) => ()
+        };
 
         let inode_to_meta = get_index_contents();
 
