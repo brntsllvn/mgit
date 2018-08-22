@@ -20,21 +20,17 @@ mod tests {
 
     #[test]
     fn creates_mgit_db() {
+        InitCommand.execute(vec!["dummy arg".to_string()]);
+
         let mgit_path = "./.mgit";
-        let obj_path = "./.mgit/objects";
-        let ref_path = "./.mgit/refs";
-        let dummy_args = vec!["hi".to_string()];
-
-        InitCommand.execute(dummy_args);
-
         let results = vec![
             File::open(mgit_path),
-            File::open(obj_path),
-            File::open(ref_path)
+            File::open("./.mgit/objects"),
+            File::open("./.mgit/refs")
         ];
         for result in results {
             match result {
-                Err(_) => panic!("dir does not exist"),
+                Err(e) => panic!("{:?} dir does not exist", e),
                 Ok(_) => ()
             }
         }
