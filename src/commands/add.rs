@@ -2,7 +2,8 @@ use std::env;
 use commands::Command;
 use std::fs;
 use std::fs::File;
-
+use std::io::prelude::*;
+use std::collections::HashMap;
 
 pub struct AddCommand;
 
@@ -14,7 +15,7 @@ impl Command for AddCommand {
         //////////////////////////////
         create_index_if_necessary();
 
-
+        let inode_to_meta = get_index_contents();
 
         // create index (if it does not exist)
         // read index contents into hash table: inode => metadata struct
@@ -42,11 +43,15 @@ fn create_index_if_necessary() {
     let index_path = "./.mgit/index";
     match File::open(index_path) {
         Err(_) => match File::create(index_path) {
-            Err(_) => panic!("cannot create index"),
+            Err(e) => panic!("cannot create index: {:?}", e),
             Ok(_) => ()
-        } ,
+        },
         Ok(_) => ()
     };
+}
+
+fn get_index_contents<'a>() -> HashMap<u32, &'a str> {
+    HashMap::new()
 }
 
 #[cfg(test)]
@@ -55,7 +60,8 @@ mod tests {
 
     #[test]
     fn create_index_when_not_present() {
-        fs::create_dir("./.mgit");
+        let mgit_path = "./.mgit";
+        fs::create_dir(mgit_path);
 
         create_index_if_necessary();
 
@@ -65,6 +71,24 @@ mod tests {
             Ok(_) => ()
         }
 
-        fs::remove_dir_all(index_path);
+        fs::remove_dir_all(mgit_path);
+    }
+
+    #[test]
+    fn retrieve_index_contents_into_hashmap() {
+        let mgit_path = "./.mgit";
+        fs::create_dir(mgit_path);
+        let mut file = match File::create("./.mgit/index") {
+            Ok(file) => file,
+            Err(e) => panic!("{:?}", e)
+        };
+//        match file.write_all(b"1,123\n2,222") {
+//            Err(_) => panic!("something else went wrong"),
+//            Ok(_) => ()
+//        };
+
+        let inode_to_meta = get_index_contents();
+
+        assert_eq!(inode_to_meta.get(&1), None);
     }
 }
