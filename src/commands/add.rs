@@ -65,7 +65,7 @@ fn get_index_contents() -> HashMap<String, String> {
                    key_val.get(1).unwrap().to_string());
     }
 
-    println!("{:?}", map);
+    println!("\nindex contents\n{:?}", map);
     map
 }
 
