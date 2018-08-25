@@ -18,3 +18,7 @@
   - #### Stretch
   - `remote`, `pull` Fetch from and integrate with another repository or a local branch
   - `branch` List, create, or delete branches
+
+### Interesting
+- view ./git/index contents with `xxd ./.git/index`
+- [technical details of git index](https://github.com/git/git/blob/master/Documentation/technical/index-format.txt)
