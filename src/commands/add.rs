@@ -14,10 +14,7 @@ impl Command for AddCommand {
     fn execute(&self, args: Vec<String>) -> String {
         // parse additional args
         // feature support: mgit add <filename>
-        let filename = match args.iter().next() {
-            Some(filename) => filename,
-            None => panic!("missing filename")
-        };
+        let filename = args.iter().next().expect("missing filename");
 
         let (inode, last_mod_date) = get_file_metadata(filename);
 
