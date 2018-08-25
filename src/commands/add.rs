@@ -50,8 +50,24 @@ fn create_index_if_necessary() {
     };
 }
 
-fn get_index_contents<'a>() -> HashMap<u32, &'a str> {
-    HashMap::new()
+fn get_index_contents() -> HashMap<String, String> {
+    let index_path = "./.mgit/index";
+    let index_contents = fs::read_to_string(index_path);
+
+    let mut lines = match index_contents {
+        Ok(ref file_contents) => file_contents.lines(),
+        Err(_) => panic!("failed to split contents")
+    };
+
+    let mut map = HashMap::new();
+    for line in lines {
+        let key_val: Vec<&str> = line.split(",").collect();
+        map.insert(key_val.get(0).unwrap().to_string(),
+                   key_val.get(1).unwrap().to_string());
+    }
+
+    println!("{:?}", map);
+    map
 }
 
 #[cfg(test)]
@@ -85,7 +101,9 @@ mod tests {
 
         let inode_to_meta = get_index_contents();
 
-        assert_eq!(inode_to_meta.get(&1), None);
+        assert_eq!(inode_to_meta.get("1"), None);
+
+        fs::remove_dir_all(mgit_path);
     }
 
     #[test]
@@ -103,6 +121,9 @@ mod tests {
 
         let inode_to_meta = get_index_contents();
 
-        assert_eq!(inode_to_meta.get(&1), None);
+        assert_eq!(inode_to_meta.get("1"), Some(&"123".to_string()));
+        assert_eq!(inode_to_meta.get("2"), Some(&"222".to_string()));
+
+        fs::remove_dir_all(mgit_path);
     }
 }
