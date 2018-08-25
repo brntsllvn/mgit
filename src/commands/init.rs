@@ -2,14 +2,15 @@ use commands::Command;
 use std::fs;
 use std::fs::File;
 use std::error::Error;
+use constants::*;
 
 pub struct InitCommand;
 
 impl Command for InitCommand {
     fn execute(&self, args: Vec<String>) -> String {
-        fs::create_dir("./.mgit");
-        fs::create_dir("./.mgit/objects");
-        fs::create_dir("./.mgit/refs");
+        fs::create_dir(MGIT_PATH);
+        fs::create_dir(OBJ_PATH);
+        fs::create_dir(REF_PATH);
         "Initialized empty git repo".to_string()
     }
 }
@@ -22,11 +23,10 @@ mod tests {
     fn creates_mgit_db() {
         InitCommand.execute(vec!["dummy arg".to_string()]);
 
-        let mgit_path = "./.mgit";
         let results = vec![
-            File::open(mgit_path),
-            File::open("./.mgit/objects"),
-            File::open("./.mgit/refs")
+            File::open(MGIT_PATH),
+            File::open(OBJ_PATH),
+            File::open(REF_PATH)
         ];
         for result in results {
             match result {
@@ -35,6 +35,6 @@ mod tests {
             }
         }
 
-        fs::remove_dir_all(mgit_path);
+        fs::remove_dir_all(MGIT_PATH);
     }
 }

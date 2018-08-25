@@ -3,6 +3,7 @@ use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::collections::HashMap;
+use constants::*;
 
 pub struct AddCommand;
 
@@ -39,9 +40,8 @@ impl Command for AddCommand {
 }
 
 fn create_index_if_necessary() {
-    let index_path = "./.mgit/index";
-    match File::open(index_path) {
-        Err(_) => match File::create(index_path) {
+    match File::open(INDEX_PATH) {
+        Err(_) => match File::create(INDEX_PATH) {
             Err(e) => panic!("cannot create index: {:?}", e),
             Ok(_) => ()
         },
@@ -50,8 +50,7 @@ fn create_index_if_necessary() {
 }
 
 fn get_index_contents() -> HashMap<String, String> {
-    let index_path = "./.mgit/index";
-    let index_contents = fs::read_to_string(index_path);
+    let index_contents = fs::read_to_string(INDEX_PATH);
 
     let mut lines = match index_contents {
         Ok(ref file_contents) => file_contents.lines(),
@@ -75,25 +74,22 @@ mod tests {
 
     #[test]
     fn create_index_when_not_present() {
-        let mgit_path = "./.mgit";
-        fs::create_dir(mgit_path);
+        fs::create_dir(MGIT_PATH);
 
         create_index_if_necessary();
 
-        let index_path = "./.mgit/index";
-        match File::open(index_path) {
+        match File::open(INDEX_PATH) {
             Err(_) => panic!("index does not exist"),
             Ok(_) => ()
         }
 
-        fs::remove_dir_all(mgit_path);
+        fs::remove_dir_all(MGIT_PATH);
     }
 
     #[test]
     fn retrieve_empty_index_into_hashmap() {
-        let mgit_path = "./.mgit";
-        fs::create_dir(mgit_path);
-        let mut file = match File::create("./.mgit/index") {
+        fs::create_dir(MGIT_PATH);
+        let mut file = match File::create(INDEX_PATH) {
             Ok(file) => file,
             Err(e) => panic!("{:?}", e)
         };
@@ -102,14 +98,13 @@ mod tests {
 
         assert_eq!(inode_to_meta.get("1"), None);
 
-        fs::remove_dir_all(mgit_path);
+        fs::remove_dir_all(MGIT_PATH);
     }
 
     #[test]
     fn retrieve_populated_index_into_hashmap() {
-        let mgit_path = "./.mgit";
-        fs::create_dir(mgit_path);
-        let mut file = match File::create("./.mgit/index") {
+        fs::create_dir(MGIT_PATH);
+        let mut file = match File::create(INDEX_PATH) {
             Ok(file) => file,
             Err(e) => panic!("{:?}", e)
         };
@@ -123,6 +118,6 @@ mod tests {
         assert_eq!(inode_to_meta.get("1"), Some(&"123".to_string()));
         assert_eq!(inode_to_meta.get("2"), Some(&"222".to_string()));
 
-        fs::remove_dir_all(mgit_path);
+        fs::remove_dir_all(MGIT_PATH);
     }
 }
