@@ -63,6 +63,8 @@ fn get_index_contents() -> HashMap<String, String> {
     map
 }
 
+// TODO: remove dependency on env::set_current_dir...
+// ... so that we can run tests in parallel
 #[cfg(test)]
 mod tests {
     use super::*;
