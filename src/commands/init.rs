@@ -3,6 +3,7 @@ use std::fs;
 use std::fs::File;
 use std::error::Error;
 use constants::*;
+use std::env;
 
 pub struct InitCommand;
 
@@ -21,6 +22,10 @@ mod tests {
 
     #[test]
     fn creates_mgit_db() {
+        let test_dir = "./TEST_create_mgit_db";
+        fs::create_dir(test_dir);
+        env::set_current_dir(&test_dir).is_ok();
+
         InitCommand.execute(vec!["dummy arg".to_string()]);
 
         let results = vec![
@@ -35,6 +40,7 @@ mod tests {
             }
         }
 
-        fs::remove_dir_all(MGIT_PATH);
+        env::set_current_dir("..");
+        fs::remove_dir_all(test_dir);
     }
 }

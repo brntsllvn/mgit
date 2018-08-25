@@ -3,6 +3,7 @@ use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::collections::HashMap;
+use std::env;
 use constants::*;
 
 pub struct AddCommand;
@@ -74,6 +75,10 @@ mod tests {
 
     #[test]
     fn create_index_when_not_present() {
+        let test_dir = "./TEST_index_not_present";
+        fs::create_dir(test_dir);
+        env::set_current_dir(&test_dir).is_ok();
+
         fs::create_dir(MGIT_PATH);
 
         create_index_if_necessary();
@@ -83,11 +88,16 @@ mod tests {
             Ok(_) => ()
         }
 
-        fs::remove_dir_all(MGIT_PATH);
+        env::set_current_dir("..");
+        fs::remove_dir_all(test_dir);
     }
 
     #[test]
     fn retrieve_empty_index_into_hashmap() {
+        let test_dir = "./TEST_empty_index_hash";
+        fs::create_dir(test_dir);
+        env::set_current_dir(&test_dir).is_ok();
+
         fs::create_dir(MGIT_PATH);
         let mut file = match File::create(INDEX_PATH) {
             Ok(file) => file,
@@ -98,11 +108,16 @@ mod tests {
 
         assert_eq!(inode_to_meta.get("1"), None);
 
-        fs::remove_dir_all(MGIT_PATH);
+        env::set_current_dir("..");
+        fs::remove_dir_all(test_dir);
     }
 
     #[test]
     fn retrieve_populated_index_into_hashmap() {
+        let test_dir = "./TEST_index_into_hash";
+        fs::create_dir(test_dir);
+        env::set_current_dir(&test_dir).is_ok();
+
         fs::create_dir(MGIT_PATH);
         let mut file = match File::create(INDEX_PATH) {
             Ok(file) => file,
@@ -118,6 +133,7 @@ mod tests {
         assert_eq!(inode_to_meta.get("1"), Some(&"123".to_string()));
         assert_eq!(inode_to_meta.get("2"), Some(&"222".to_string()));
 
-        fs::remove_dir_all(MGIT_PATH);
+        env::set_current_dir("..");
+        fs::remove_dir_all(test_dir);
     }
 }
