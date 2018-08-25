@@ -5,16 +5,28 @@ use std::io::prelude::*;
 use std::collections::HashMap;
 use std::env;
 use constants::*;
+use std::time::{SystemTime, UNIX_EPOCH, Instant};
+use std::os::unix::fs::MetadataExt;
 
 pub struct AddCommand;
 
 impl Command for AddCommand {
     fn execute(&self, args: Vec<String>) -> String {
+        // parse additional args
+        // feature support: mgit add <filename>
+        let filename = match args.iter().next() {
+            Some(filename) => filename,
+            None => panic!("missing filename")
+        };
+
+        let (inode, last_mod_date) = get_file_metadata(filename);
+
+
+
         // create index (if it does not exist)
         create_index_if_necessary();
         // read index contents into hash table: inode => last_mod_date
         let inode_to_meta = get_index_contents();
-        // clear index
         // if file is new (inode is not in keyset)
         //      store blob
         //      add entry to index
@@ -22,6 +34,7 @@ impl Command for AddCommand {
         //      store blob
         //      remove old entry from index
         //      add new entry to index
+        // clear index
         // write index from hash
 
         // store blob
@@ -32,6 +45,24 @@ impl Command for AddCommand {
 
         "Index updated".to_string()
     }
+}
+
+fn get_file_metadata(filename: &str) -> (u64, u64) {
+    let (inode, last_mod_date) = match fs::metadata(filename) {
+        Ok(metadata) => (metadata.ino(), convert_to_ms(metadata.modified().unwrap())),
+        Err(_) => panic!("cannot retrieve file metadata")
+    };
+    println!("{:?}", (inode, last_mod_date));
+    (inode, last_mod_date)
+}
+
+fn convert_to_ms(last_mod_date: SystemTime) -> u64 {
+    let since_the_epoch = last_mod_date
+        .duration_since(UNIX_EPOCH)
+        .expect("something went wrong");;
+    let ms = since_the_epoch.as_secs() * 1000 +
+             since_the_epoch.subsec_nanos() as u64 / 1_000_000;
+    ms
 }
 
 fn create_index_if_necessary() {
@@ -68,6 +99,12 @@ fn get_index_contents() -> HashMap<String, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn get_filename_from_args() {
+        get_file_metadata("./.gitignore");
+//        assert_eq!(true, false);
+    }
 
     #[test]
     fn create_index_when_not_present() {
