@@ -10,32 +10,26 @@ pub struct AddCommand;
 
 impl Command for AddCommand {
     fn execute(&self, args: Vec<String>) -> String {
-
-        //////////////////////////////
-        // implementation goes here //
-        //////////////////////////////
-        create_index_if_necessary();
-
-        let inode_to_meta = get_index_contents();
-
         // create index (if it does not exist)
-        // read index contents into hash table: inode => metadata struct
-        // if no change => do nothing
-        // else...
-        //
+        create_index_if_necessary();
+        // read index contents into hash table: inode => last_mod_date
+        let inode_to_meta = get_index_contents();
+        // clear index
+        // if file is new (inode is not in keyset)
+        //      store blob
+        //      add entry to index
+        // if file has changed (last_mod_date != index last_mod_date)
+        //      store blob
+        //      remove old entry from index
+        //      add new entry to index
+        // write index from hash
 
-        // feature scope: mgit add path/filename
+        // store blob
+        //      concat header onto contents
+        //      calculate sha1 of header+contents
+        //      DEFLATE header+contents
+        //      store deflated stuff at '.git/objects/' + sha1[0,2] + '/' + sha1[2,38]
 
-        // check for file change
-        //      if no change => do nothing
-        //      else ...
-        //          store blob
-        //              concat header onto contents
-        //              calculate sha1 of header+contents
-        //              DEFLATE header+contents
-        //              store deflated stuff at '.git/objects/' + sha1[0,2] + '/' + sha1[2,38]
-        //          add entry to .git/index
-        //              inode => metadata { last modified date, last changed date, sha1 }
         "Index updated".to_string()
     }
 }
