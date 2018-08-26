@@ -2,3 +2,7 @@
 name = "mgit"
 version = "0.1.0"
 authors = ["Brent Sullivan <brntsllvn@gmail.com>"]
+
+[dependencies]
+sha1 = "0.6.0"
+flate2 = { version = "1.0", features = ["zlib"], default-features = false }

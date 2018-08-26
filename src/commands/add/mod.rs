@@ -7,6 +7,12 @@ use std::env;
 use constants::*;
 use std::time::{SystemTime, UNIX_EPOCH, Instant};
 use std::os::unix::fs::MetadataExt;
+extern crate sha1;
+
+extern crate flate2;
+use std::io::prelude::*;
+use commands::add::flate2::Compression;
+use commands::add::flate2::write::ZlibEncoder;
 
 pub struct AddCommand;
 
@@ -16,22 +22,60 @@ impl Command for AddCommand {
         let filemeta = get_file_metadata(filename);
         create_index_if_necessary();
         let mut index_hash = get_index_contents();
+        // TODO: replace with command factory and execution
         match get_add_action(&filemeta, &index_hash) {
             FileStatus::Untracked => process_untracked_file(&filemeta, &mut index_hash),
             FileStatus::Changed => process_changed_file(filename.to_string()),
             FileStatus::Unchanged => nothing_to_do()
         }
+        println!("\n{:?}\n", index_hash); // replace with `mgit status`
         "Index updated".to_string()
     }
 }
 
 fn process_untracked_file(filemeta: &FileMeta, index_hash: &mut HashMap<String, String>) {
-    // store blob
-    // add entry to index hash
+    store_blob(filemeta.filename.clone());
     add_new_entry_to_index_hash(&filemeta, index_hash);
-    // write index from hash
     write_hash_to_index(&index_hash);
-    println!("untracked");
+}
+
+fn store_blob(filename: String) -> String {
+    let file = File::open(&filename).expect("storing blob: cannot open file");
+    let file_contents = fs::read_to_string(&filename).expect("storing bloc: cannot read file contents");
+    let header_plus_contents = concat_header_onto_contents(&file_contents);
+    let sha1 = calculate_sha1(&header_plus_contents);
+    let deflated_contents = deflate_contents(&header_plus_contents);
+    let sha1_path = store_deflated_contents(&sha1, deflated_contents);
+    sha1_path
+}
+
+fn concat_header_onto_contents(s: &str) -> String {
+    format!("blob {}{}{}", s.len(), '\u{0000}', s)
+}
+
+fn calculate_sha1(s: &str) -> String {
+    sha1::Sha1::from(s).digest().to_string()
+}
+
+fn deflate_contents(s: &str) -> Vec<u8> {
+    let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
+    let contents = format!("{}", s);
+    let bytes = contents.as_bytes();
+    e.write_all(bytes);
+    let compressed_bytes = e.finish();
+    compressed_bytes.expect("could not deflate bytes")
+}
+
+fn store_deflated_contents(sha1: &str, bytes: Vec<u8>) -> String {
+    let sha1_dir = format!("{}/{}", OBJ_PATH.to_owned(), &sha1[0..2]);
+    fs::create_dir(&sha1_dir).expect("could not create sha1 dir");
+    println!("{:?}", fs::metadata(&sha1_dir));
+    let sha1_filepath = format!("{}/{}", sha1_dir, &sha1[2..]);
+    println!("{}", &sha1_filepath);
+    println!("{:?}", fs::metadata(&sha1_filepath));
+    let mut obj_file = File::create(&sha1_filepath).expect("could not write deflated contents to sha1 file");
+    obj_file.write_all(&bytes);
+    sha1_filepath.to_string()
 }
 
 fn add_new_entry_to_index_hash(filemeta: &FileMeta, index_hash: &mut HashMap<String, String>) {
@@ -63,11 +107,6 @@ fn nothing_to_do() {
     println!("unchanged");
 }
 
-// store blob
-//      concat header onto contents
-//      calculate sha1 of header+contents
-//      DEFLATE header+contents
-//      store deflated stuff at '.git/objects/' + sha1[0,2] + '/' + sha1[2,38]
 
 struct FileMeta {
     inode: String,
@@ -217,20 +256,44 @@ mod tests {
         fs::create_dir(test_dir);
         env::set_current_dir(&test_dir).is_ok();
         fs::create_dir(MGIT_PATH);
-        let mut file = match File::create(INDEX_PATH) {
-            Ok(file) => file,
-            Err(e) => panic!("{:?}", e)
-        };
+        fs::create_dir(OBJ_PATH);
+        File::create(INDEX_PATH);
 
         let new_filepath = "./test.txt";
         let new_file = File::create(new_filepath).expect("could not create test file");
         let filemeta = get_file_metadata(new_filepath);
+
         let mut index_hash_before = get_index_contents();
 
         process_untracked_file(&filemeta, &mut index_hash_before);
 
         let mut index_hash_after = get_index_contents();
-        assert_eq!(index_hash_after.get(&filemeta.inode), Some(&filemeta.last_mod_secs_from_epoch.to_string()));
+        assert_eq!(index_hash_after.get(&filemeta.inode),
+                   Some(&filemeta.last_mod_secs_from_epoch.to_string()));
+
+        env::set_current_dir("..");
+        fs::remove_dir_all(test_dir);
+    }
+
+    #[test]
+    fn store_a_new_blob() {
+        let test_dir = "./TEST_store_a_new_blob";
+        fs::create_dir(test_dir);
+        env::set_current_dir(&test_dir).is_ok();
+        fs::create_dir(MGIT_PATH);
+        fs::create_dir(OBJ_PATH);
+
+        let new_filepath = "./test.txt";
+        let mut new_file = File::create(new_filepath).expect("could not create test file");
+        let file_contents = "some file contents".as_bytes();
+        new_file.write_all(file_contents);
+
+        let sha1_path = store_blob(new_filepath.to_string());
+
+        match File::open(sha1_path) {
+            Err(_) => panic!("sha1 path does not exist"),
+            Ok(_) => ()
+        }
 
         env::set_current_dir("..");
         fs::remove_dir_all(test_dir);
