@@ -1,5 +1,4 @@
 use std::env;
-
 mod commands;
 mod constants;
 

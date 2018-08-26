@@ -12,55 +12,88 @@ pub struct AddCommand;
 
 impl Command for AddCommand {
     fn execute(&self, args: Vec<String>) -> String {
-        // parse additional args
-        // feature support: mgit add <filename>
         let filename = args.iter().next().expect("missing filename");
-
-        let (inode, last_mod_date) = get_file_metadata(filename);
-
-
-
-        // create index (if it does not exist)
+        let file_meta = get_file_metadata(filename);
         create_index_if_necessary();
-        // read index contents into hash table: inode => last_mod_date
-        let inode_to_meta = get_index_contents();
-        // if file is new (inode is not in keyset)
-        //      store blob
-        //      add entry to index
-        // if file has changed (last_mod_date != index last_mod_date)
-        //      store blob
-        //      remove old entry from index
-        //      add new entry to index
-        // clear index
-        // write index from hash
-
-        // store blob
-        //      concat header onto contents
-        //      calculate sha1 of header+contents
-        //      DEFLATE header+contents
-        //      store deflated stuff at '.git/objects/' + sha1[0,2] + '/' + sha1[2,38]
-
+        let index_hash = get_index_contents();
+        match get_add_action(file_meta, index_hash) {
+            FileStatus::Untracked => process_untracked_file(filename.to_string()),
+            FileStatus::Changed => process_changed_file(filename.to_string()),
+            FileStatus::Unchanged => nothing_to_do()
+        }
         "Index updated".to_string()
     }
 }
 
-fn get_file_metadata(filename: &str) -> (u64, u64) {
-    let (inode, last_mod_date) = match fs::metadata(filename) {
-        Ok(metadata) => (metadata.ino(), convert_to_ms(metadata.modified().unwrap())),
-        Err(_) => panic!("cannot retrieve file metadata")
-    };
-    println!("{:?}", (inode, last_mod_date));
-    (inode, last_mod_date)
+fn process_untracked_file(filename: String) {
+    // store blob
+    // add entry to index hash
+    // clear index
+    // write index from hash
+    println!("untracked");
 }
 
-fn convert_to_ms(last_mod_date: SystemTime) -> u64 {
+fn process_changed_file(filename: String) {
+    // store blob
+    // remove old entry from index
+    // add entry to index hash
+    // clear index
+    // write index from hash
+    println!("change");
+}
+
+fn nothing_to_do() {
+    println!("unchanged");
+}
+
+// store blob
+//      concat header onto contents
+//      calculate sha1 of header+contents
+//      DEFLATE header+contents
+//      store deflated stuff at '.git/objects/' + sha1[0,2] + '/' + sha1[2,38]
+
+struct FileMeta {
+    inode: String,
+    last_mod_secs_from_epoch: String
+}
+
+enum FileStatus {
+    Untracked,
+    Changed,
+    Unchanged
+}
+
+fn get_add_action(file_meta: FileMeta, index_hash: HashMap<String, String>) -> FileStatus {
+    if !index_hash.contains_key(&file_meta.inode) {
+        FileStatus::Untracked
+    } else {
+        let cached_last_mod_data = index_hash.get(&file_meta.inode).unwrap().to_string();
+        if cached_last_mod_data != file_meta.last_mod_secs_from_epoch {
+            FileStatus::Changed
+        } else {
+            FileStatus::Unchanged
+        }
+    }
+}
+
+fn get_file_metadata(filename: &str) -> FileMeta {
+    match fs::metadata(filename) {
+        Ok(metadata) => FileMeta {
+            inode: metadata.ino().to_string(),
+            last_mod_secs_from_epoch: to_str(metadata.modified().unwrap())
+        },
+        Err(_) => panic!("cannot retrieve file metadata from {}", filename)
+    }
+}
+
+fn to_str(last_mod_date: SystemTime) -> String {
     let since_the_epoch = last_mod_date
         .duration_since(UNIX_EPOCH)
         .expect("something went wrong");;
-    let ms = since_the_epoch.as_secs() * 1000 +
-             since_the_epoch.subsec_nanos() as u64 / 1_000_000;
-    ms
+    let ms = since_the_epoch.as_secs() * 1000;
+    ms.to_string()
 }
+
 
 fn create_index_if_necessary() {
     match File::open(INDEX_PATH) {
@@ -83,16 +116,16 @@ fn get_index_contents() -> HashMap<String, String> {
     let mut map = HashMap::new();
     for line in lines {
         let key_val: Vec<&str> = line.split(",").collect();
-        map.insert(key_val.get(0).unwrap().to_string(),
-                   key_val.get(1).unwrap().to_string());
+        let inode = key_val.get(0).unwrap().to_string();
+        let last_mod_date = key_val.get(1).unwrap().to_string();
+        map.insert(inode,last_mod_date);
     }
 
-    println!("\nindex contents\n{:?}", map);
     map
 }
 
-// TODO: remove dependency on env::set_current_dir...
-// ... so that we can run tests in parallel
+
+// TODO: remove dependency on env::set_current_dir to parallelize tests
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -2,5 +2,3 @@
 name = "mgit"
 version = "0.1.0"
 authors = ["Brent Sullivan <brntsllvn@gmail.com>"]
-
-[dependencies]
