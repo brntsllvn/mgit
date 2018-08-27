@@ -1,7 +1,5 @@
 use commands::Command;
 use std::fs;
-use std::fs::File;
-use std::error::Error;
 use constants::*;
 use std::env;
 
@@ -29,9 +27,9 @@ mod tests {
         InitCommand.execute(vec!["dummy arg".to_string()]);
 
         let results = vec![
-            File::open(MGIT_PATH),
-            File::open(OBJ_PATH),
-            File::open(REF_PATH)
+            fs::File::open(MGIT_PATH),
+            fs::File::open(OBJ_PATH),
+            fs::File::open(REF_PATH)
         ];
         for result in results {
             match result {
