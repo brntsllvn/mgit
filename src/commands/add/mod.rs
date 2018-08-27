@@ -77,7 +77,7 @@ fn store_deflated_contents(sha1: &str, bytes: Vec<u8>) -> String {
 fn upsert_entry_into_index_hash(filemeta: &FileMeta, index_hash: &mut HashMap<String, String>) {
     let inode = filemeta.inode.clone();
     let last_mod_date = filemeta.last_mod_secs_from_epoch.clone();
-    index_hash.entry(inode).or_insert(last_mod_date);
+    index_hash.insert(inode, last_mod_date);
 }
 
 fn write_hash_to_index(index_hash: &HashMap<String, String>) {
