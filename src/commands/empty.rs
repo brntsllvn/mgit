@@ -3,7 +3,7 @@ use commands::Command;
 pub struct EmptyCommand;
 
 impl Command for EmptyCommand {
-    fn execute(&self, args: Vec<String>) -> String {
+    fn execute(&self, _args: Vec<String>) -> String {
 "command        Description
 ----------------------------------------------
 init           Create an empty Git repository

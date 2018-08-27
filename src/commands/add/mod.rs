@@ -5,12 +5,11 @@ use std::io::prelude::*;
 use std::collections::HashMap;
 use std::env;
 use constants::*;
-use std::time::{SystemTime, UNIX_EPOCH, Instant};
+use std::time::{SystemTime, UNIX_EPOCH};
 use std::os::unix::fs::MetadataExt;
 extern crate sha1;
 
 extern crate flate2;
-use std::io::prelude::*;
 use commands::add::flate2::Compression;
 use commands::add::flate2::write::ZlibEncoder;
 
@@ -37,7 +36,6 @@ fn process(filemeta: &FileMeta, index_hash: &mut HashMap<String, String>) {
 }
 
 fn store_blob(filename: String) -> String {
-    let file = File::open(&filename).expect("storing blob: cannot open file");
     let file_contents = fs::read_to_string(&filename).expect("storing bloc: cannot read file contents");
     let header_plus_contents = concat_header_onto_contents(&file_contents);
     let sha1 = calculate_sha1(&header_plus_contents);
@@ -132,7 +130,7 @@ fn create_index_if_necessary() {
 fn get_index_contents() -> HashMap<String, String> {
     let index_contents = fs::read_to_string(INDEX_PATH);
 
-    let mut lines = match index_contents {
+    let lines = match index_contents {
         Ok(ref file_contents) => file_contents.lines(),
         Err(_) => panic!("failed to split contents")
     };

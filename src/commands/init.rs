@@ -6,10 +6,10 @@ use std::env;
 pub struct InitCommand;
 
 impl Command for InitCommand {
-    fn execute(&self, args: Vec<String>) -> String {
-        fs::create_dir(MGIT_PATH);
-        fs::create_dir(OBJ_PATH);
-        fs::create_dir(REF_PATH);
+    fn execute(&self, _args: Vec<String>) -> String {
+        fs::create_dir(MGIT_PATH).expect("could not create mgit path");
+        fs::create_dir(OBJ_PATH).expect("could not create obj path");
+        fs::create_dir(REF_PATH).expect("could not create ref path");
         "Initialized empty git repo".to_string()
     }
 }

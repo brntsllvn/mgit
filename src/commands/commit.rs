@@ -3,7 +3,7 @@ use commands::Command;
 pub struct CommitCommand;
 
 impl Command for CommitCommand {
-    fn execute(&self, args: Vec<String>) -> String {
+    fn execute(&self, _args: Vec<String>) -> String {
 
         //////////////////////////////
         // implementation goes here //
