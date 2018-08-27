@@ -58,7 +58,7 @@ fn deflate_contents(s: &str) -> Vec<u8> {
     let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
     let contents = format!("{}", s);
     let bytes = contents.as_bytes();
-    e.write_all(bytes);
+    e.write_all(bytes).expect("could not write deflated contents");
     let compressed_bytes = e.finish();
     compressed_bytes.expect("could not deflate bytes")
 }
@@ -70,8 +70,8 @@ fn store_deflated_contents(sha1: &str, bytes: Vec<u8>) -> String {
         Err(_) => fs::create_dir(&sha1_dir).expect(&format!("could not create sha1 dir {}", &sha1_dir))
     }
     let sha1_filepath = format!("{}/{}", sha1_dir, &sha1[2..]);
-    let mut obj_file = File::create(&sha1_filepath).expect("could not write deflated contents to sha1 file");
-//    obj_file.write_all(&bytes);
+    let mut obj_file = File::create(&sha1_filepath).expect("could not create sha1 file");
+    obj_file.write_all(&bytes).expect("could not write deflated contents to sha1 file");
     sha1_filepath.to_string()
 }
 
