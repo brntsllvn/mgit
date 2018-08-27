@@ -71,7 +71,7 @@ fn store_deflated_contents(sha1: &str, bytes: Vec<u8>) -> String {
     }
     let sha1_filepath = format!("{}/{}", sha1_dir, &sha1[2..]);
     let mut obj_file = File::create(&sha1_filepath).expect("could not write deflated contents to sha1 file");
-    obj_file.write_all(&bytes);
+//    obj_file.write_all(&bytes);
     sha1_filepath.to_string()
 }
 
