@@ -24,8 +24,7 @@ impl Command for AddCommand {
         let mut index_hash = get_index_contents();
         // TODO: replace with command factory and execution
         match get_add_action(&filemeta, &index_hash) {
-            FileStatus::Untracked => process_untracked_file(&filemeta, &mut index_hash),
-            FileStatus::Changed => process_changed_file(filename.to_string()),
+            FileStatus::NewOrUpdated => process_new_or_updated_file(&filemeta, &mut index_hash),
             FileStatus::Unchanged => nothing_to_do()
         }
         println!("\n{:?}\n", index_hash); // replace with `mgit status`
@@ -33,9 +32,9 @@ impl Command for AddCommand {
     }
 }
 
-fn process_untracked_file(filemeta: &FileMeta, index_hash: &mut HashMap<String, String>) {
+fn process_new_or_updated_file(filemeta: &FileMeta, index_hash: &mut HashMap<String, String>) {
     store_blob(filemeta.filename.clone());
-    add_new_entry_to_index_hash(&filemeta, index_hash);
+    upsert_entry_into_index_hash(&filemeta, index_hash);
     write_hash_to_index(&index_hash);
 }
 
@@ -78,10 +77,10 @@ fn store_deflated_contents(sha1: &str, bytes: Vec<u8>) -> String {
     sha1_filepath.to_string()
 }
 
-fn add_new_entry_to_index_hash(filemeta: &FileMeta, index_hash: &mut HashMap<String, String>) {
+fn upsert_entry_into_index_hash(filemeta: &FileMeta, index_hash: &mut HashMap<String, String>) {
     let inode = filemeta.inode.clone();
     let last_mod_date = filemeta.last_mod_secs_from_epoch.clone();
-    index_hash.insert(inode, last_mod_date);
+    index_hash.entry(inode).or_insert(last_mod_date);
 }
 
 fn write_hash_to_index(index_hash: &HashMap<String, String>) {
@@ -92,15 +91,6 @@ fn write_hash_to_index(index_hash: &HashMap<String, String>) {
         index.write_all(bytes).expect("writing index: could not write");
         index.sync_data();
     }
-}
-
-fn process_changed_file(filename: String) {
-    // store blob
-    // remove old entry from index
-    // add entry to index hash
-    // clear index
-    // write index from hash
-    println!("change");
 }
 
 fn nothing_to_do() {
@@ -115,22 +105,20 @@ struct FileMeta {
 }
 
 enum FileStatus {
-    Untracked,
-    Changed,
+    NewOrUpdated,
     Unchanged
 }
 
 fn get_add_action(file_meta: &FileMeta, index_hash: &HashMap<String, String>) -> FileStatus {
-    if !index_hash.contains_key(&file_meta.inode) {
-        FileStatus::Untracked
+    if new_or_updated_file(&file_meta.inode, &file_meta.last_mod_secs_from_epoch, &index_hash) {
+        FileStatus::NewOrUpdated
     } else {
-        let cached_last_mod_data = index_hash.get(&file_meta.inode).unwrap().to_string();
-        if cached_last_mod_data != file_meta.last_mod_secs_from_epoch {
-            FileStatus::Changed
-        } else {
-            FileStatus::Unchanged
-        }
+        FileStatus::Unchanged
     }
+}
+
+fn new_or_updated_file(inode: &str, last_mod: &str, hash: &HashMap<String, String>) -> bool {
+    !hash.contains_key(inode) || hash.get(inode).unwrap().to_string() != last_mod
 }
 
 fn get_file_metadata(filename: &str) -> FileMeta {
@@ -251,31 +239,6 @@ mod tests {
     }
 
     #[test]
-    fn update_index_for_untracked_file() {
-        let test_dir = "./TEST_update_index_for_untracked";
-        fs::create_dir(test_dir);
-        env::set_current_dir(&test_dir).is_ok();
-        fs::create_dir(MGIT_PATH);
-        fs::create_dir(OBJ_PATH);
-        File::create(INDEX_PATH);
-
-        let new_filepath = "./test.txt";
-        let new_file = File::create(new_filepath).expect("could not create test file");
-        let filemeta = get_file_metadata(new_filepath);
-
-        let mut index_hash_before = get_index_contents();
-
-        process_untracked_file(&filemeta, &mut index_hash_before);
-
-        let mut index_hash_after = get_index_contents();
-        assert_eq!(index_hash_after.get(&filemeta.inode),
-                   Some(&filemeta.last_mod_secs_from_epoch.to_string()));
-
-        env::set_current_dir("..");
-        fs::remove_dir_all(test_dir);
-    }
-
-    #[test]
     fn store_a_new_blob() {
         let test_dir = "./TEST_store_a_new_blob";
         fs::create_dir(test_dir);
@@ -294,6 +257,31 @@ mod tests {
             Err(_) => panic!("sha1 path does not exist"),
             Ok(_) => ()
         }
+
+        env::set_current_dir("..");
+        fs::remove_dir_all(test_dir);
+    }
+
+    #[test]
+    fn update_index_for_untracked_file() {
+        let test_dir = "./TEST_update_index_for_untracked";
+        fs::create_dir(test_dir);
+        env::set_current_dir(&test_dir).is_ok();
+        fs::create_dir(MGIT_PATH);
+        fs::create_dir(OBJ_PATH);
+        File::create(INDEX_PATH);
+
+        let new_filepath = "./test.txt";
+        let new_file = File::create(new_filepath).expect("could not create test file");
+        let filemeta = get_file_metadata(new_filepath);
+
+        let mut index_hash_before = get_index_contents();
+
+        process_new_or_updated_file(&filemeta, &mut index_hash_before);
+
+        let mut index_hash_after = get_index_contents();
+        assert_eq!(index_hash_after.get(&filemeta.inode),
+                   Some(&filemeta.last_mod_secs_from_epoch.to_string()));
 
         env::set_current_dir("..");
         fs::remove_dir_all(test_dir);
