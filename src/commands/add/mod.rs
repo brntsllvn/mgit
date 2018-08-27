@@ -22,17 +22,15 @@ impl Command for AddCommand {
         let filemeta = get_file_metadata(filename);
         create_index_if_necessary();
         let mut index_hash = get_index_contents();
-        // TODO: replace with command factory and execution
-        match get_add_action(&filemeta, &index_hash) {
-            FileStatus::NewOrUpdated => process_new_or_updated_file(&filemeta, &mut index_hash),
-            FileStatus::Unchanged => nothing_to_do()
+        if new_or_updated_file(&filemeta.inode, &filemeta.last_mod_secs_from_epoch, &index_hash) {
+            process(&filemeta, &mut index_hash);
         }
         println!("\n{:?}\n", index_hash); // replace with `mgit status`
         "Index updated".to_string()
     }
 }
 
-fn process_new_or_updated_file(filemeta: &FileMeta, index_hash: &mut HashMap<String, String>) {
+fn process(filemeta: &FileMeta, index_hash: &mut HashMap<String, String>) {
     store_blob(filemeta.filename.clone());
     upsert_entry_into_index_hash(&filemeta, index_hash);
     write_hash_to_index(&index_hash);
@@ -97,24 +95,10 @@ fn nothing_to_do() {
     println!("unchanged");
 }
 
-
 struct FileMeta {
     inode: String,
     last_mod_secs_from_epoch: String,
     filename: String
-}
-
-enum FileStatus {
-    NewOrUpdated,
-    Unchanged
-}
-
-fn get_add_action(file_meta: &FileMeta, index_hash: &HashMap<String, String>) -> FileStatus {
-    if new_or_updated_file(&file_meta.inode, &file_meta.last_mod_secs_from_epoch, &index_hash) {
-        FileStatus::NewOrUpdated
-    } else {
-        FileStatus::Unchanged
-    }
 }
 
 fn new_or_updated_file(inode: &str, last_mod: &str, hash: &HashMap<String, String>) -> bool {
@@ -277,7 +261,7 @@ mod tests {
 
         let mut index_hash_before = get_index_contents();
 
-        process_new_or_updated_file(&filemeta, &mut index_hash_before);
+        process(&filemeta, &mut index_hash_before);
 
         let mut index_hash_after = get_index_contents();
         assert_eq!(index_hash_after.get(&filemeta.inode),
