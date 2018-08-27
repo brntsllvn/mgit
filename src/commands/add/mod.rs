@@ -68,10 +68,7 @@ fn deflate_contents(s: &str) -> Vec<u8> {
 fn store_deflated_contents(sha1: &str, bytes: Vec<u8>) -> String {
     let sha1_dir = format!("{}/{}", OBJ_PATH.to_owned(), &sha1[0..2]);
     fs::create_dir(&sha1_dir).expect("could not create sha1 dir");
-    println!("{:?}", fs::metadata(&sha1_dir));
     let sha1_filepath = format!("{}/{}", sha1_dir, &sha1[2..]);
-    println!("{}", &sha1_filepath);
-    println!("{:?}", fs::metadata(&sha1_filepath));
     let mut obj_file = File::create(&sha1_filepath).expect("could not write deflated contents to sha1 file");
     obj_file.write_all(&bytes);
     sha1_filepath.to_string()
