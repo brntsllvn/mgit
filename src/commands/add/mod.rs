@@ -87,12 +87,7 @@ fn write_hash_to_index(index_hash: &HashMap<String, String>) {
         let new_index_entry = format!("{},{}\n", key, index_hash.get(key).unwrap());
         let bytes = new_index_entry.as_bytes();
         index.write_all(bytes).expect("writing index: could not write");
-        index.sync_data();
     }
-}
-
-fn nothing_to_do() {
-    println!("unchanged");
 }
 
 struct FileMeta {
