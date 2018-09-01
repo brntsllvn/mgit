@@ -42,7 +42,6 @@ fn to_str(last_mod_date: SystemTime) -> String {
 }
 
 struct IndexLine {
-    inode: String,
     mode: String,
     mgit_type: String,
     sha1: String,
@@ -65,7 +64,6 @@ fn get_index_contents() -> HashMap<String, IndexLine> {
         let key_val: Vec<&str> = line.split(",").collect();
         let inode = key_val.get(0).unwrap().to_string();
         let index_line = IndexLine {
-            inode: key_val.get(0).unwrap().to_string(),
             mode: key_val.get(1).unwrap().to_string(),
             mgit_type: key_val.get(2).unwrap().to_string(),
             sha1: key_val.get(3).unwrap().to_string(),
@@ -97,9 +95,7 @@ fn new_or_updated_file(filemeta: &FileMeta, hash: &HashMap<String, IndexLine>) -
 // TODO: pass in sha1
 fn update_in_memory_hash(filemeta: &FileMeta, sha1: &str, index_hash: &mut HashMap<String, IndexLine>) {
     let inode = filemeta.inode.clone();
-    let last_mod_date = filemeta.last_mod.clone();
     let index_line = IndexLine {
-        inode: filemeta.inode.clone(),
         mode: String::from("100644"),
         mgit_type: String::from("blob"),
         sha1: sha1.to_string(),
