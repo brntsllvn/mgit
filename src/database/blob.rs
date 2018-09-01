@@ -4,7 +4,7 @@ extern crate sha1;
 extern crate flate2;
 use self::flate2::Compression;
 use self::flate2::write::ZlibEncoder;
-use constants::*;
+use filepaths::*;
 use std::io::Write;
 
 pub fn save_blob(filename: &str) -> String {

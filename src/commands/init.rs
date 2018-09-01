@@ -1,6 +1,6 @@
 use commands::Command;
 use std::fs;
-use constants::*;
+use filepaths::*;
 
 pub struct InitCommand;
 
