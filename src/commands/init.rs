@@ -1,7 +1,6 @@
 use commands::Command;
 use std::fs;
 use constants::*;
-use std::env;
 
 pub struct InitCommand;
 
@@ -17,6 +16,7 @@ impl Command for InitCommand {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env;
 
     #[test]
     fn creates_mgit_db() {

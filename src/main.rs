@@ -1,6 +1,7 @@
 use std::env;
 mod commands;
 mod constants;
+mod database;
 
 fn main() {
     let mut args= env::args();
