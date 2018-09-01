@@ -13,7 +13,7 @@ pub fn save_blob(filename: &str) -> String {
     let sha1 = calculate_sha1(&header_plus_contents);
     let deflated_contents = deflate_contents(&header_plus_contents);
     let sha1_path = store_deflated_contents(&sha1, deflated_contents);
-    sha1_path
+    sha1
 }
 
 fn concat_header_onto_contents(s: &str) -> String {
