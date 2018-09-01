@@ -14,7 +14,6 @@ impl Command for AddCommand {
     fn execute(&self, args: Vec<String>) -> String {
         let filename = args.iter().next().expect("missing filename");
         let filemeta = get_file_metadata(filename);
-        create_index_if_necessary();
         let mut index_hash = get_index_contents();
         if new_or_updated_file(&filemeta.inode, &filemeta.last_mod_secs_from_epoch, &index_hash) {
             process(&filemeta, &mut index_hash);
@@ -74,60 +73,13 @@ fn to_str(last_mod_date: SystemTime) -> String {
     ms.to_string()
 }
 
-fn create_index_if_necessary() {
-    match File::open(INDEX_PATH) {
-        Err(_) => match File::create(INDEX_PATH) {
-            Err(e) => panic!("cannot create index: {:?}", e),
-            Ok(_) => ()
-        },
-        Ok(_) => ()
-    };
-}
-
-fn get_index_contents() -> HashMap<String, String> {
-    let index_contents = fs::read_to_string(INDEX_PATH);
-
-    let lines = match index_contents {
-        Ok(ref file_contents) => file_contents.lines(),
-        Err(_) => panic!("failed to split contents")
-    };
-
-    let mut map = HashMap::new();
-    for line in lines {
-        let key_val: Vec<&str> = line.split(",").collect();
-        let inode = key_val.get(0).unwrap().to_string();
-        let last_mod_date = key_val.get(1).unwrap().to_string();
-        map.insert(inode,last_mod_date);
-    }
-
-    map
-}
 
 // TODO: remove dependency on env::set_current_dir to parallelize tests
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::env;
-
-    #[test]
-    fn create_index_when_not_present() {
-        let test_dir = "./TEST_index_not_present";
-        fs::create_dir(test_dir);
-        env::set_current_dir(&test_dir).is_ok();
-
-        fs::create_dir(MGIT_PATH);
-
-        create_index_if_necessary();
-
-        match File::open(INDEX_PATH) {
-            Err(_) => panic!("index does not exist"),
-            Ok(_) => ()
-        }
-
-        env::set_current_dir("..");
-        fs::remove_dir_all(test_dir);
-    }
-
+    
     #[test]
     fn retrieve_empty_index_into_hashmap() {
         let test_dir = "./TEST_empty_index_hash";

@@ -6,6 +6,39 @@ use self::flate2::Compression;
 use self::flate2::write::ZlibEncoder;
 use constants::*;
 use std::io::Write;
+use std::collections::HashMap;
+
+pub fn get_index_contents() -> HashMap<String, String> {
+    create_index_if_necessary();
+
+    let index_contents = fs::read_to_string(INDEX_PATH);
+
+    let lines = match index_contents {
+        Ok(ref file_contents) => file_contents.lines(),
+        Err(_) => panic!("failed to split contents")
+    };
+
+    let mut map = HashMap::new();
+    for line in lines {
+        let key_val: Vec<&str> = line.split(",").collect();
+        let inode = key_val.get(0).unwrap().to_string();
+        let last_mod_date = key_val.get(1).unwrap().to_string();
+        map.insert(inode,last_mod_date);
+    }
+
+    map
+}
+
+fn create_index_if_necessary() {
+    match File::open(INDEX_PATH) {
+        Err(_) => match File::create(INDEX_PATH) {
+            Err(e) => panic!("cannot create index: {:?}", e),
+            Ok(_) => ()
+        },
+        Ok(_) => ()
+    };
+}
+
 
 pub fn store_blob(filename: String) -> String {
     let file_contents = fs::read_to_string(&filename).expect("storing bloc: cannot read file contents");
