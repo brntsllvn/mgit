@@ -39,8 +39,20 @@ fn create_index_if_necessary() {
     };
 }
 
+pub fn save_index(index_hash: &HashMap<String, String>) {
+    let mut index = File::create(INDEX_PATH).expect("writing index: could not open index");
+    for key in index_hash.keys() {
+        let new_index_entry = format!("{},{}\n", key, index_hash.get(key).unwrap());
+        let bytes = new_index_entry.as_bytes();
+        index.write_all(bytes).expect("writing index: could not write");
+    }
+}
 
-pub fn store_blob(filename: String) -> String {
+pub fn new_or_updated_file(inode: &str, last_mod: &str, hash: &HashMap<String, String>) -> bool {
+    !hash.contains_key(inode) || hash.get(inode).unwrap().to_string() != last_mod
+}
+
+pub fn save_blob(filename: String) -> String {
     let file_contents = fs::read_to_string(&filename).expect("storing bloc: cannot read file contents");
     let header_plus_contents = concat_header_onto_contents(&file_contents);
     let sha1 = calculate_sha1(&header_plus_contents);

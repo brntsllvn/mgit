@@ -24,9 +24,9 @@ impl Command for AddCommand {
 }
 
 fn process(filemeta: &FileMeta, index_hash: &mut HashMap<String, String>) {
-    store_blob(filemeta.filename.clone());
+    save_blob(filemeta.filename.clone());
     upsert_entry_into_index_hash(&filemeta, index_hash);
-    write_hash_to_index(&index_hash);
+    save_index(&index_hash);
 }
 
 fn upsert_entry_into_index_hash(filemeta: &FileMeta, index_hash: &mut HashMap<String, String>) {
@@ -35,23 +35,10 @@ fn upsert_entry_into_index_hash(filemeta: &FileMeta, index_hash: &mut HashMap<St
     index_hash.insert(inode, last_mod_date);
 }
 
-fn write_hash_to_index(index_hash: &HashMap<String, String>) {
-    let mut index = File::create(INDEX_PATH).expect("writing index: could not open index");
-    for key in index_hash.keys() {
-        let new_index_entry = format!("{},{}\n", key, index_hash.get(key).unwrap());
-        let bytes = new_index_entry.as_bytes();
-        index.write_all(bytes).expect("writing index: could not write");
-    }
-}
-
 struct FileMeta {
     inode: String,
     last_mod_secs_from_epoch: String,
     filename: String
-}
-
-fn new_or_updated_file(inode: &str, last_mod: &str, hash: &HashMap<String, String>) -> bool {
-    !hash.contains_key(inode) || hash.get(inode).unwrap().to_string() != last_mod
 }
 
 fn get_file_metadata(filename: &str) -> FileMeta {
@@ -79,7 +66,7 @@ fn to_str(last_mod_date: SystemTime) -> String {
 mod tests {
     use super::*;
     use std::env;
-    
+
     #[test]
     fn retrieve_empty_index_into_hashmap() {
         let test_dir = "./TEST_empty_index_hash";
@@ -138,7 +125,7 @@ mod tests {
         let file_contents = "some file contents".as_bytes();
         new_file.write_all(file_contents);
 
-        let sha1_path = store_blob(new_filepath.to_string());
+        let sha1_path = save_blob(new_filepath.to_string());
 
         match File::open(sha1_path) {
             Err(_) => panic!("sha1 path does not exist"),
