@@ -3,7 +3,11 @@ use commands::Command;
 pub struct CommitCommand;
 
 impl Command for CommitCommand {
-    fn execute(&self, _args: Vec<String>) -> String {
+    fn execute(&self, args: Vec<String>) -> String {
+        let mut input_iterator = args.iter();
+        let msg_flag = input_iterator.next().expect("missing message flag");
+        if msg_flag != "-m" { panic!("expected message flag: -m") };
+        let msg = input_iterator.next().expect("missing message");
 
         // create tree from index
         //   format:
@@ -39,6 +43,6 @@ impl Command for CommitCommand {
         //////////////////////////////
         //////////////////////////////
 
-        "Committed...".to_string() // SHA-1
+        msg.to_string() // SHA-1
     }
 }
