@@ -14,7 +14,6 @@ impl Command for CommitCommand {
         //       mode
         //       type
         //       sha1
-        //     stat:
         //       filename
         //   calculate_sha1
         //   deflate_contents
