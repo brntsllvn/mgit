@@ -12,11 +12,11 @@ struct FileMeta {
     filename: String
 }
 
-pub fn update_index(filename: &str) {
+pub fn update_index(filename: &str, sha1: &str) {
     let filemeta = get_file_metadata(&filename);
     let mut index_hash = get_index_contents();
     if new_or_updated_file(&filemeta, &index_hash) {
-        update_in_memory_hash(&filemeta, &mut index_hash);
+        update_in_memory_hash(&filemeta, &sha1, &mut index_hash);
         let index_file = truncate_index_file();
         write_index_to_disk(index_file, &index_hash);
     }
@@ -95,14 +95,14 @@ fn new_or_updated_file(filemeta: &FileMeta, hash: &HashMap<String, IndexLine>) -
 }
 
 // TODO: pass in sha1
-fn update_in_memory_hash(filemeta: &FileMeta, index_hash: &mut HashMap<String, IndexLine>) {
+fn update_in_memory_hash(filemeta: &FileMeta, sha1: &str, index_hash: &mut HashMap<String, IndexLine>) {
     let inode = filemeta.inode.clone();
     let last_mod_date = filemeta.last_mod.clone();
     let index_line = IndexLine {
         inode: filemeta.inode.clone(),
         mode: String::from("100644"),
         mgit_type: String::from("blob"),
-        sha1: String::from ("345345345345345345"),
+        sha1: sha1.to_string(),
         filename: filemeta.filename.clone(),
         last_mod: filemeta.last_mod.clone()
     };
@@ -179,8 +179,9 @@ mod tests {
         let new_filepath = "./test.txt";
         let new_file = File::create(new_filepath).expect("could not create test file");
         let filemeta = get_file_metadata(new_filepath);
+        let sha1 = "3df4a1".to_string();
 
-        update_index(&filemeta.filename);
+        update_index(&filemeta.filename, &sha1);
 
         let mut index_hash = get_index_contents();
 
