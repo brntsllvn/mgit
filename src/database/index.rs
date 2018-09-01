@@ -147,7 +147,7 @@ mod tests {
             Ok(file) => file,
             Err(e) => panic!("{:?}", e)
         };
-        
+
         match file.write_all(b"1,100644,blob,df4522,hi.txt,123\n\
                                2,040000,tree,da332f,some_dir,222")
         {
@@ -167,26 +167,27 @@ mod tests {
         fs::remove_dir_all(test_dir);
     }
 
-//    #[test]
-//    fn update_index_for_untracked_file() {
-//        let test_dir = "./TEST_update_index_for_untracked";
-//        fs::create_dir(test_dir);
-//        env::set_current_dir(&test_dir).is_ok();
-//        fs::create_dir(MGIT_PATH);
-//        fs::create_dir(OBJ_PATH);
-//        File::create(INDEX_PATH);
-//
-//        let new_filepath = "./test.txt";
-//        let new_file = File::create(new_filepath).expect("could not create test file");
-//        let filemeta = get_file_metadata(new_filepath);
-//
-//        update_index(&filemeta.filename);
-//
-//        let mut index_hash_after = get_index_contents();
-//        assert_eq!(index_hash_after.get(&filemeta.inode),
-//                   Some(&filemeta.last_mod.to_string()));
-//
-//        env::set_current_dir("..");
-//        fs::remove_dir_all(test_dir);
-//    }
+    #[test]
+    fn update_index_for_untracked_file() {
+        let test_dir = "./TEST_update_index_for_untracked";
+        fs::create_dir(test_dir);
+        env::set_current_dir(&test_dir).is_ok();
+        fs::create_dir(MGIT_PATH);
+        fs::create_dir(OBJ_PATH);
+        File::create(INDEX_PATH);
+
+        let new_filepath = "./test.txt";
+        let new_file = File::create(new_filepath).expect("could not create test file");
+        let filemeta = get_file_metadata(new_filepath);
+
+        update_index(&filemeta.filename);
+
+        let mut index_hash = get_index_contents();
+
+        let index_line1 =  index_hash.get(&filemeta.inode).unwrap();
+        assert_eq!(index_line1.last_mod, filemeta.last_mod.to_string());
+
+        env::set_current_dir("..");
+        fs::remove_dir_all(test_dir);
+    }
 }
