@@ -1,4 +1,3 @@
-use commands::Command;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
@@ -18,7 +17,7 @@ pub fn update_index(filename: &str) {
     let mut index_hash = get_index_contents();
     if new_or_updated_file(&filemeta, &index_hash) {
         update_in_memory_hash(&filemeta, &mut index_hash);
-        let mut index_file = truncate_index_file();
+        let index_file = truncate_index_file();
         write_index_to_disk(index_file, &index_hash);
     }
 }

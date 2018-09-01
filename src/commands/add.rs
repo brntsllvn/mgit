@@ -1,14 +1,5 @@
 use commands::Command;
-use std::fs;
-use std::fs::File;
-use std::io::prelude::*;
-use std::collections::HashMap;
-use constants::*;
-use std::time::{SystemTime, UNIX_EPOCH};
-use std::os::unix::fs::MetadataExt;
-use database;
-use database::blob::save_blob;
-use database::index::update_index;
+use database::{blob::save_blob, index::update_index};
 
 pub struct AddCommand;
 

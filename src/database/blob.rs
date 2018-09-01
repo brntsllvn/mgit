@@ -6,7 +6,6 @@ use self::flate2::Compression;
 use self::flate2::write::ZlibEncoder;
 use constants::*;
 use std::io::Write;
-use std::collections::HashMap;
 
 pub fn save_blob(filename: &str) -> String {
     let file_contents = fs::read_to_string(&filename).expect("storing bloc: cannot read file contents");
