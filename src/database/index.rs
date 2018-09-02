@@ -92,7 +92,6 @@ fn new_or_updated_file(filemeta: &FileMeta, hash: &HashMap<String, IndexLine>) -
         || hash.get(inode).unwrap().last_mod != filemeta.last_mod
 }
 
-// TODO: pass in sha1
 fn update_in_memory_hash(filemeta: &FileMeta, sha1: &str, index_hash: &mut HashMap<String, IndexLine>) {
     let inode = filemeta.inode.clone();
     let index_line = IndexLine {

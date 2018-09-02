@@ -1,5 +1,5 @@
 use commands::Command;
-use database::{blob::save_blob, index::update_index};
+use database::{save_blob, index::update_index};
 
 pub struct AddCommand;
 

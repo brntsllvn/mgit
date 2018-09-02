@@ -1,4 +1,6 @@
 use commands::Command;
+extern crate regex;
+use self::regex::Regex;
 
 pub struct CommitCommand;
 
@@ -8,7 +10,9 @@ impl Command for CommitCommand {
         let msg_flag = input_iterator.next().expect("missing message flag");
         if msg_flag != "-m" { panic!("expected message flag: -m") };
         let msg = input_iterator.next().expect("missing message");
+        validate_msg_input(&msg);
 
+        
         // create tree from index
         //   format:
         //     100644 blob 03554fdfc16c48b1f9e3b47c772b94310f52af23	Procfile
@@ -43,6 +47,13 @@ impl Command for CommitCommand {
         //////////////////////////////
         //////////////////////////////
 
+        fn validate_msg_input(msg: &str) {
+            let re = Regex::new("^[[:alnum:]|[:blank:]]{1,50}$").unwrap();
+            assert!(re.is_match(&msg));
+        }
+
         msg.to_string() // SHA-1
     }
+
+
 }

@@ -6,3 +6,4 @@ authors = ["Brent Sullivan <brntsllvn@gmail.com>"]
 [dependencies]
 sha1 = "0.6.0"
 flate2 = { version = "1.0", features = ["zlib"], default-features = false }
+regex = "1"
