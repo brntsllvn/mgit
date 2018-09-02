@@ -41,15 +41,15 @@ fn to_str(last_mod_date: SystemTime) -> String {
     ms.to_string()
 }
 
-struct IndexLine {
-    mode: String,
-    mgit_type: String,
-    sha1: String,
-    filename: String,
-    last_mod: String
+pub struct IndexLine {
+    pub mode: String,
+    pub mgit_type: String,
+    pub sha1: String,
+    pub filename: String,
+    pub last_mod: String
 }
 
-fn get_index_contents() -> HashMap<String, IndexLine> {
+pub fn get_index_contents() -> HashMap<String, IndexLine> {
     create_index_if_necessary();
 
     let index_contents = fs::read_to_string(INDEX_PATH);
@@ -104,7 +104,7 @@ fn update_in_memory_hash(filemeta: &FileMeta, sha1: &str, index_hash: &mut HashM
     index_hash.insert(inode, index_line);
 }
 
-fn truncate_index_file() -> File {
+pub fn truncate_index_file() -> File {
     File::create(INDEX_PATH).expect("writing index: could not open index")
 }
 
