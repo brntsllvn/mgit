@@ -14,6 +14,6 @@ impl Command for CommitCommand {
         let re = Regex::new("^[[:alnum:]|[:blank:]]{1,50}$").unwrap();
         assert!(re.is_match(&msg));
         let commit_sha1 = save_commit(&msg);
-        commit_sha1.to_string() // SHA-1
+        commit_sha1.to_string()
     }
 }

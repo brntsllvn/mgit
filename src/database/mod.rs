@@ -57,10 +57,9 @@ fn flatten_index_hash(index_hash: &HashMap<String, IndexLine>) -> String {
     res
 }
 
+// TODO: not implemented
 fn get_parent_sha1() -> String {
-    // create ./.mgit/HEAD if it does not exist
     // ./.mgit/HEAD contains ./refs/heads/master
-    // create ./refs/heads/master if it does not exist
     // return the sha1 contained here
 
     "234fd1".to_string()
