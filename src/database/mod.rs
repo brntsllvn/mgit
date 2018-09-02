@@ -57,8 +57,12 @@ fn flatten_index_hash(index_hash: &HashMap<String, IndexLine>) -> String {
     res
 }
 
-// TODO: not implemented
 fn get_parent_sha1() -> String {
+    // create ./.mgit/HEAD if it does not exist
+    // ./.mgit/HEAD contains ./refs/heads/master
+    // create ./refs/heads/master if it does not exist
+    // return the sha1 contained here
+
     "234fd1".to_string()
 }
 
@@ -108,8 +112,13 @@ mod blob_test {
         let file_contents = "some file contents".as_bytes();
         new_file.write_all(file_contents);
 
-        let sha1_path = save_blob(new_filepath.as_ref());
+        let sha1 = save_blob(new_filepath.as_ref());
 
+        let sha1_path = format!("{}/{}/{}",
+                                OBJ_PATH.to_owned(),
+                                &sha1[0..2],
+                                &sha1[2..]
+        );
         match File::open(sha1_path) {
             Err(_) => panic!("sha1 path does not exist"),
             Ok(_) => ()

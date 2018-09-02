@@ -1,5 +1,6 @@
 use commands::Command;
 use std::fs;
+use std::fs::File;
 use filepaths::*;
 
 pub struct InitCommand;
@@ -9,6 +10,8 @@ impl Command for InitCommand {
         fs::create_dir(MGIT_PATH).expect("could not create mgit path");
         fs::create_dir(OBJ_PATH).expect("could not create obj path");
         fs::create_dir(REF_PATH).expect("could not create ref path");
+        File::create(REFHEAD_PATH).expect("could not create ref head file");
+        File::create(HEAD_PATH).expect("could not create HEAD file");
         "Initialized empty git repo".to_string()
     }
 }
@@ -29,7 +32,9 @@ mod tests {
         let results = vec![
             fs::File::open(MGIT_PATH),
             fs::File::open(OBJ_PATH),
-            fs::File::open(REF_PATH)
+            fs::File::open(REF_PATH),
+            fs::File::open(REFHEAD_PATH),
+            fs::File::open(HEAD_PATH)
         ];
         for result in results {
             match result {
