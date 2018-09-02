@@ -11,12 +11,15 @@ impl Command for InitCommand {
         fs::create_dir(MGIT_PATH).expect("could not create mgit path");
         fs::create_dir(OBJ_PATH).expect("could not create obj path");
         fs::create_dir(REF_PATH).expect("could not create ref path");
-        File::create(REFHEAD_PATH).expect("could not create ref head file");
+
+        fs::create_dir(REFHEAD_PATH).expect("could not create ref head file");
+        File::create(MASTER_PATH).expect("could not create master path");
+
         let mut head_file = File::create(HEAD_PATH).expect("could not create HEAD file");
         head_file
             .write_all(String::from("ref: refs/heads/master").as_bytes())
             .expect("could not write master entry to HEAD");
-
+        
         "Initialized empty mgit repo".to_string()
     }
 }
