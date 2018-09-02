@@ -22,3 +22,4 @@
 ### Interesting
 - view ./git/index contents with `xxd ./.git/index`
 - [technical details of git index](https://github.com/git/git/blob/master/Documentation/technical/index-format.txt)
+- view lines of code with `git ls-files | xargs wc -l`
