@@ -45,6 +45,14 @@ fn save_tree() -> String {
     sha1
 }
 
+// TODO: not implemented
+fn get_parent_sha1() -> String {
+    // ./.mgit/HEAD contains .mgit/refs/heads/master
+    // return the sha1 contained here
+
+    "234fd1".to_string()
+}
+
 fn flatten_index_hash(index_hash: &HashMap<String, IndexLine>) -> String {
     let mut res = String::new();
     for index_line in index_hash.values() {
@@ -55,14 +63,6 @@ fn flatten_index_hash(index_hash: &HashMap<String, IndexLine>) -> String {
             index_line.filename);
     }
     res
-}
-
-// TODO: not implemented
-fn get_parent_sha1() -> String {
-    // ./.mgit/HEAD contains ./refs/heads/master
-    // return the sha1 contained here
-
-    "234fd1".to_string()
 }
 
 fn concat_header_onto_contents(s: &str) -> String {

@@ -2,6 +2,7 @@ use commands::Command;
 use std::fs;
 use std::fs::File;
 use filepaths::*;
+use std::io::Write;
 
 pub struct InitCommand;
 
@@ -11,8 +12,12 @@ impl Command for InitCommand {
         fs::create_dir(OBJ_PATH).expect("could not create obj path");
         fs::create_dir(REF_PATH).expect("could not create ref path");
         File::create(REFHEAD_PATH).expect("could not create ref head file");
-        File::create(HEAD_PATH).expect("could not create HEAD file");
-        "Initialized empty git repo".to_string()
+        let mut head_file = File::create(HEAD_PATH).expect("could not create HEAD file");
+        head_file
+            .write_all(String::from("ref: refs/heads/master").as_bytes())
+            .expect("could not write master entry to HEAD");
+
+        "Initialized empty mgit repo".to_string()
     }
 }
 
@@ -42,6 +47,15 @@ mod tests {
                 Ok(_) => ()
             }
         }
+
+        let contents = fs::read_to_string(HEAD_PATH);
+        let mut lines = match contents {
+            Ok(ref file_contents) => file_contents.lines(),
+            Err(e) => panic!("{:?} dir does not exist", e)
+        };
+
+        let symbolic_ref = lines.next().unwrap();
+        assert_eq!(symbolic_ref, "ref: refs/heads/master".to_string());
 
         env::set_current_dir("..");
         fs::remove_dir_all(test_dir);
