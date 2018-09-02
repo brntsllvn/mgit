@@ -31,6 +31,7 @@ pub fn save_commit(msg: &str) -> String {
     let sha1 = calculate_sha1(&contents);
     let deflated_contents = deflate_contents(&contents);
     store_deflated_contents(&sha1, deflated_contents);
+    save_sha1_in_branch_file(&sha1);
     truncate_index_file();
     sha1
 }
@@ -41,16 +42,28 @@ fn save_tree() -> String {
     let sha1 = calculate_sha1(&contents);
     let deflated_contents = deflate_contents(&contents);
     store_deflated_contents(&sha1, deflated_contents);
-    // TODO: not implemented
     sha1
 }
 
-// TODO: not implemented
 fn get_parent_sha1() -> String {
-    // ./.mgit/HEAD contains .mgit/refs/heads/master
-    // return the sha1 contained here
+    let index_contents = fs::read_to_string(MASTER_PATH);
+    let mut lines = match index_contents {
+        Ok(ref file_contents) => file_contents.lines(),
+        Err(_) => panic!("failed to retrieve sha1 from master file")
+    };
 
-    "234fd1".to_string()
+    let parent_sha1 = match lines.next() {
+        Some(sha1) => sha1,
+        None => "<none>"
+    };
+    parent_sha1.to_string()
+}
+
+fn save_sha1_in_branch_file(sha1: &str) {
+    let mut master_file = File::create(MASTER_PATH).expect("could not open master file");
+    master_file
+        .write_all(sha1.as_bytes())
+        .expect("could not update master file");
 }
 
 fn flatten_index_hash(index_hash: &HashMap<String, IndexLine>) -> String {
