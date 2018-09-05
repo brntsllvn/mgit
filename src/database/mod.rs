@@ -124,6 +124,25 @@ pub fn get_reflated_contents(sha1: &str) -> String {
     s.to_string()
 }
 
+pub fn print_commit_history() {
+    let head_sha1 = fs::read_to_string(MASTER_PATH).expect("could not open master path");
+    print_history(&head_sha1);
+    "".to_string();
+}
+
+fn print_history(sha1: &str) {
+    if sha1.len() < 40 {
+        return;
+    }
+    let contents = get_reflated_contents(&sha1);
+    println!("{}", &contents);
+    println!("{}", "-".repeat(47));
+    let lines: Vec<&str> = contents.lines().collect();
+    let parent_sha1_line = lines.get(1).expect("could not get sha1 line from commit");
+    let parent_sha1 = &parent_sha1_line[7..];
+    print_history(parent_sha1);
+}
+
 #[cfg(test)]
 mod blob_test {
     use super::*;

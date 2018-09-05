@@ -10,7 +10,8 @@ impl Command for EmptyCommand {
         add            add file contents to the index\n\
         status         show the working tree status\n\
         commit         record changes to the repository\n\
-        cat-file       show compressed file contents"
+        cat-file       show compressed file contents\n\
+        log            show commit logs"
         .to_string()
     }
 }
