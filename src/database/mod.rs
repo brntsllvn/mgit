@@ -88,20 +88,24 @@ fn concat_header_onto_contents(s: &str) -> String {
     format!("blob {}{}{}", s.len(), '\u{0000}', s)
 }
 
-
 fn store_deflated_contents(sha1: &str, bytes: Vec<u8>) {
-    let sha1_dir = format!("{}/{}", OBJ_PATH.to_owned(), &sha1[0..2]);
+    let sha1_dir =
+        format!("{}/{}", OBJ_PATH.to_owned(), &sha1[0..2]);
     match fs::read_dir(&sha1_dir) {
         Ok(_) => (),
-        Err(_) => fs::create_dir(&sha1_dir).expect(&format!("could not create sha1 dir"))
+        Err(_) => fs::create_dir(&sha1_dir)
+            .expect("could not create sha1 dir")
     }
-    let sha1_filepath = format!("{}/{}", sha1_dir, &sha1[2..]);
-    let mut obj_file = File::create(&sha1_filepath).expect("could not create sha1 file");
-    obj_file.write_all(&bytes).expect("could not write deflated contents to sha1 file");
+    let sha1_path = get_sha1_path(&sha1);
+    let mut obj_file = File::create(&sha1_path)
+        .expect("could not create sha1 file");
+    obj_file.write_all(&bytes)
+        .expect("could not write deflated contents to sha1 file");
 }
 
 pub fn print_commit_history() {
-    let head_sha1 = fs::read_to_string(MASTER_PATH).expect("could not open master path");
+    let head_sha1 = fs::read_to_string(MASTER_PATH)
+        .expect("could not open master path");
     print_history(&head_sha1);
     "".to_string();
 }
@@ -114,9 +118,8 @@ fn print_history(sha1: &str) {
     println!("{}", &contents);
     println!("{}", "-".repeat(47));
     let lines: Vec<&str> = contents.lines().collect();
-    let parent_sha1_line =
-        lines.get(1)
-            .expect("could not get sha1 line from commit");
+    let parent_sha1_line = lines.get(1)
+        .expect("could not get sha1 line from commit");
     let parent_sha1 = &parent_sha1_line[7..];
     print_history(parent_sha1);
 }
@@ -158,11 +161,7 @@ mod blob_test {
 
         let sha1 = save_blob(new_filepath.as_ref());
 
-        let sha1_path = format!("{}/{}/{}-blob",
-                                OBJ_PATH.to_owned(),
-                                &sha1[0..2],
-                                &sha1[2..]
-        );
+        let sha1_path = get_sha1_path(&sha1);
         match File::open(sha1_path) {
             Err(_) => panic!("sha1 path does not exist"),
             Ok(_) => ()
