@@ -1,7 +1,8 @@
 use std::env;
 mod commands;
-mod filepaths;
+mod compression;
 mod database;
+mod filepaths;
 mod hash;
 
 fn main() {

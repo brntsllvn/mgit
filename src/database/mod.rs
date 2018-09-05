@@ -1,12 +1,8 @@
 pub mod index;
 use std::fs;
 use std::fs::File;
-extern crate flate2;
-use self::flate2::Compression;
-use self::flate2::write::ZlibEncoder;
-use self::flate2::read::ZlibDecoder;
 use filepaths::*;
-use std::io::{Read, Write};
+use std::io::Write;
 use database::index::{
         get_index_contents,
         truncate_index_file,
@@ -15,7 +11,7 @@ use database::index::{
     };
 use std::collections::HashMap;
 use hash::calculate_sha1;
-
+use compression::{deflate_contents, reflate_contents};
 
 pub fn save_blob(filename: &str) -> String {
     let file_contents = fs::read_to_string(&filename).expect("storing bloc: cannot read file contents");
@@ -92,14 +88,6 @@ fn concat_header_onto_contents(s: &str) -> String {
     format!("blob {}{}{}", s.len(), '\u{0000}', s)
 }
 
-fn deflate_contents(s: &str) -> Vec<u8> {
-    let mut e = ZlibEncoder::new(Vec::new(), Compression::default());
-    let contents = format!("{}", s);
-    let bytes = contents.as_bytes();
-    e.write_all(bytes).expect("could not write deflated contents");
-    let compressed_bytes = e.finish();
-    compressed_bytes.expect("could not deflate bytes")
-}
 
 fn store_deflated_contents(sha1: &str, bytes: Vec<u8>) {
     let sha1_dir = format!("{}/{}", OBJ_PATH.to_owned(), &sha1[0..2]);
@@ -110,15 +98,6 @@ fn store_deflated_contents(sha1: &str, bytes: Vec<u8>) {
     let sha1_filepath = format!("{}/{}", sha1_dir, &sha1[2..]);
     let mut obj_file = File::create(&sha1_filepath).expect("could not create sha1 file");
     obj_file.write_all(&bytes).expect("could not write deflated contents to sha1 file");
-}
-
-pub fn get_reflated_contents(sha1: &str) -> String {
-    let sha1_path = format!("{}/{}/{}", OBJ_PATH.to_owned(), &sha1[0..2], &sha1[2..]);
-    let byte_vec = fs::read(&sha1_path).expect("could not open sha1 file");
-    let mut z = ZlibDecoder::new(&byte_vec[..]);
-    let mut s = String::new();
-    let _result = z.read_to_string(&mut s);
-    s.to_string()
 }
 
 pub fn print_commit_history() {
@@ -135,9 +114,28 @@ fn print_history(sha1: &str) {
     println!("{}", &contents);
     println!("{}", "-".repeat(47));
     let lines: Vec<&str> = contents.lines().collect();
-    let parent_sha1_line = lines.get(1).expect("could not get sha1 line from commit");
+    let parent_sha1_line =
+        lines.get(1)
+            .expect("could not get sha1 line from commit");
     let parent_sha1 = &parent_sha1_line[7..];
     print_history(parent_sha1);
+}
+
+pub fn get_reflated_contents(sha1: &str) -> String {
+    let sha1_path = get_sha1_path(&sha1);
+    let byte_vec = fs::read(&sha1_path)
+        .expect("could not open sha1 file");
+    let orig_contents = reflate_contents(&byte_vec);
+    orig_contents
+}
+
+fn get_sha1_path(sha1: &str) -> String {
+    let sha1_path =
+        format!("{}/{}/{}",
+            OBJ_PATH.to_owned(),
+            &sha1[0..2],
+            &sha1[2..]);
+    sha1_path.to_string()
 }
 
 #[cfg(test)]

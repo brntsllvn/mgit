@@ -1,5 +1,5 @@
 use commands::Command;
-use database::{get_reflated_contents};
+use database::get_reflated_contents;
 
 pub struct CatFileCommand;
 
