@@ -11,10 +11,10 @@
   - [x] `init` Create an empty Git repository
   - [x] `add` Add file contents to the index
   - [x] `commit` Record changes to the repository
-  - #### Nice to have
   - [x] `status` Show the working tree status
+  - [x] `cat-file -p` Show the decompressed contents of an mgit object
   - [ ] `log` Show commit logs
-  - [ ] `checkout` restore a commit's working tree
+
 
 ### Interesting
 - view ./git/index contents with `xxd ./.git/index`
