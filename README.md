@@ -8,16 +8,13 @@
 ### Functionality
 - `mgit`
   - #### Must have
-  - `init` Create an empty Git repository
-  - `add` Add file contents to the index
-  - `commit` Record changes to the repository
+  - [x] `init` Create an empty Git repository
+  - [x] `add` Add file contents to the index
+  - [x] `commit` Record changes to the repository
   - #### Nice to have
-  - `status` Show the working tree status
-  - `log` Show commit logs
-  - `reset` Reset current HEAD to the specified state
-  - #### Stretch
-  - `remote`, `pull` Fetch from and integrate with another repository or a local branch
-  - `branch` List, create, or delete branches
+  - [x] `status` Show the working tree status
+  - [ ] `log` Show commit logs
+  - [ ] `checkout` restore a commit's working tree
 
 ### Interesting
 - view ./git/index contents with `xxd ./.git/index`

@@ -8,7 +8,9 @@ impl Command for EmptyCommand {
         ----------------------------------------------\n\
         init           create an empty mgit repository\n\
         add            add file contents to the index\n\
-        commit         record changes to the repository"
+        status         show the working tree status\n\
+        commit         record changes to the repository\n\
+        cat-file       show compressed file contents"
         .to_string()
     }
 }
