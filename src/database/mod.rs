@@ -115,6 +115,7 @@ fn print_history(sha1: &str) {
         return;
     }
     let contents = get_reflated_contents(&sha1);
+    println!("commit {}", &sha1);
     println!("{}", &contents);
     println!("{}", "-".repeat(47));
     let lines: Vec<&str> = contents.lines().collect();
