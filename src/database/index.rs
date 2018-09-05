@@ -76,6 +76,11 @@ pub fn get_index_contents() -> HashMap<String, IndexLine> {
     map
 }
 
+pub fn index_is_empty() -> bool {
+    let hash = get_index_contents();
+    hash.keys().len() == 0
+}
+
 fn create_index_if_necessary() {
     match File::open(INDEX_PATH) {
         Err(_) => match File::create(INDEX_PATH) {

@@ -8,7 +8,11 @@ use self::flate2::write::ZlibEncoder;
 use self::flate2::read::ZlibDecoder;
 use filepaths::*;
 use std::io::{Read, Write};
-use database::index::{get_index_contents, truncate_index_file, IndexLine};
+use database::index::{
+    get_index_contents,
+    truncate_index_file,
+    index_is_empty,
+    IndexLine};
 use std::collections::HashMap;
 
 
@@ -22,6 +26,10 @@ pub fn save_blob(filename: &str) -> String {
 }
 
 pub fn save_commit(msg: &str) -> String {
+    if index_is_empty() {
+        return "".to_string()
+    }
+
     let tree_sha1 = save_tree();
     let parent_sha1 = get_parent_sha1();
     let contents = format!("\
