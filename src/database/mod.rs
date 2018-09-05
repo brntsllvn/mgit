@@ -107,16 +107,6 @@ fn store_deflated_contents(sha1: &str, bytes: Vec<u8>) {
     obj_file.write_all(&bytes).expect("could not write deflated contents to sha1 file");
 }
 
-////////////////////
-/////// REFLATE//////
-/////@$@#$@#$@#$@#$@#$
-////////////////////
-/////// REFLATE//////
-/////@$@#$@#$@#$@#$@#$
-////////////////////
-/////// REFLATE//////
-/////@$@#$@#$@#$@#$@#$
-
 pub fn get_reflated_contents(sha1: &str) -> String {
     let sha1_path = format!("{}/{}/{}", OBJ_PATH.to_owned(), &sha1[0..2], &sha1[2..]);
     let byte_vec = fs::read(&sha1_path).expect("could not open sha1 file");
@@ -125,15 +115,6 @@ pub fn get_reflated_contents(sha1: &str) -> String {
     let _result = z.read_to_string(&mut s);
     s.to_string()
 }
-
-/////// REFLATE//////
-/////@$@#$@#$@#$@#$@#$
-////////////////////
-/////// REFLATE//////
-/////@$@#$@#$@#$@#$@#$
-////////////////////
-/////// REFLATE//////
-/////@$@#$@#$@#$@#$@#$
 
 #[cfg(test)]
 mod blob_test {
