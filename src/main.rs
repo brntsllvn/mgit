@@ -2,6 +2,7 @@ use std::env;
 mod commands;
 mod filepaths;
 mod database;
+mod hash;
 
 fn main() {
     let mut args= env::args();

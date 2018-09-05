@@ -1,7 +1,6 @@
 pub mod index;
 use std::fs;
 use std::fs::File;
-extern crate sha1;
 extern crate flate2;
 use self::flate2::Compression;
 use self::flate2::write::ZlibEncoder;
@@ -9,11 +8,13 @@ use self::flate2::read::ZlibDecoder;
 use filepaths::*;
 use std::io::{Read, Write};
 use database::index::{
-    get_index_contents,
-    truncate_index_file,
-    index_is_empty,
-    IndexLine};
+        get_index_contents,
+        truncate_index_file,
+        index_is_empty,
+        IndexLine
+    };
 use std::collections::HashMap;
+use hash::calculate_sha1;
 
 
 pub fn save_blob(filename: &str) -> String {
@@ -89,10 +90,6 @@ fn flatten_index_hash(index_hash: &HashMap<String, IndexLine>) -> String {
 
 fn concat_header_onto_contents(s: &str) -> String {
     format!("blob {}{}{}", s.len(), '\u{0000}', s)
-}
-
-fn calculate_sha1(s: &str) -> String {
-    sha1::Sha1::from(s).digest().to_string()
 }
 
 fn deflate_contents(s: &str) -> Vec<u8> {
