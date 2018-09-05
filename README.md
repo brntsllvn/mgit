@@ -7,13 +7,12 @@
 
 ### Functionality
 - `mgit`
-  - #### Must have
   - [x] `init` Create an empty Git repository
   - [x] `add` Add file contents to the index
   - [x] `commit` Record changes to the repository
   - [x] `status` Show the working tree status
   - [x] `cat-file -p` Show the decompressed contents of an mgit object
-  - [ ] `log` Show commit logs
+  - [x] `log` Show commit logs
 
 
 ### Interesting
