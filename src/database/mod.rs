@@ -5,8 +5,9 @@ extern crate sha1;
 extern crate flate2;
 use self::flate2::Compression;
 use self::flate2::write::ZlibEncoder;
+use self::flate2::read::ZlibDecoder;
 use filepaths::*;
-use std::io::Write;
+use std::io::{Read, Write};
 use database::index::{get_index_contents, truncate_index_file, IndexLine};
 use std::collections::HashMap;
 
@@ -16,7 +17,7 @@ pub fn save_blob(filename: &str) -> String {
     let header_plus_contents = concat_header_onto_contents(&file_contents);
     let sha1 = calculate_sha1(&header_plus_contents);
     let deflated_contents = deflate_contents(&header_plus_contents);
-    store_deflated_contents(&sha1, "blob", deflated_contents);
+    store_deflated_contents(&sha1, deflated_contents);
     sha1
 }
 
@@ -30,7 +31,7 @@ pub fn save_commit(msg: &str) -> String {
         {}", tree_sha1, parent_sha1, msg);
     let sha1 = calculate_sha1(&contents);
     let deflated_contents = deflate_contents(&contents);
-    store_deflated_contents(&sha1, "commit", deflated_contents);
+    store_deflated_contents(&sha1, deflated_contents);
     save_sha1_in_branch_file(&sha1);
     truncate_index_file();
     sha1
@@ -41,7 +42,7 @@ fn save_tree() -> String {
     let contents = flatten_index_hash(&index_hash);
     let sha1 = calculate_sha1(&contents);
     let deflated_contents = deflate_contents(&contents);
-    store_deflated_contents(&sha1, "tree", deflated_contents);
+    store_deflated_contents(&sha1, deflated_contents);
     sha1
 }
 
@@ -95,16 +96,44 @@ fn deflate_contents(s: &str) -> Vec<u8> {
     compressed_bytes.expect("could not deflate bytes")
 }
 
-fn store_deflated_contents(sha1: &str, mgit_type: &str, bytes: Vec<u8>) {
+fn store_deflated_contents(sha1: &str, bytes: Vec<u8>) {
     let sha1_dir = format!("{}/{}", OBJ_PATH.to_owned(), &sha1[0..2]);
     match fs::read_dir(&sha1_dir) {
         Ok(_) => (),
         Err(_) => fs::create_dir(&sha1_dir).expect(&format!("could not create sha1 dir"))
     }
-    let sha1_filepath = format!("{}/{}-{}", sha1_dir, &sha1[2..], mgit_type);
+    let sha1_filepath = format!("{}/{}", sha1_dir, &sha1[2..]);
     let mut obj_file = File::create(&sha1_filepath).expect("could not create sha1 file");
     obj_file.write_all(&bytes).expect("could not write deflated contents to sha1 file");
 }
+
+////////////////////
+/////// REFLATE//////
+/////@$@#$@#$@#$@#$@#$
+////////////////////
+/////// REFLATE//////
+/////@$@#$@#$@#$@#$@#$
+////////////////////
+/////// REFLATE//////
+/////@$@#$@#$@#$@#$@#$
+
+pub fn get_reflated_contents(sha1: &str) -> String {
+    let sha1_path = format!("{}/{}/{}", OBJ_PATH.to_owned(), &sha1[0..2], &sha1[2..]);
+    let byte_vec = fs::read(&sha1_path).expect("could not open sha1 file");
+    let mut z = ZlibDecoder::new(&byte_vec[..]);
+    let mut s = String::new();
+    let _result = z.read_to_string(&mut s);
+    s.to_string()
+}
+
+/////// REFLATE//////
+/////@$@#$@#$@#$@#$@#$
+////////////////////
+/////// REFLATE//////
+/////@$@#$@#$@#$@#$@#$
+////////////////////
+/////// REFLATE//////
+/////@$@#$@#$@#$@#$@#$
 
 #[cfg(test)]
 mod blob_test {
