@@ -117,7 +117,7 @@ fn write_index_to_disk(mut index: File, hash: &HashMap<String, IndexLine>) {
 
     for inode in hash.keys() {
         let index_line = hash.get(inode).unwrap();
-        let new_index_entry = format!("{},{},{},{},{},{}\n",
+        let new_index_entry = format!("{},{},{},{},{},{}",
                                       inode,
                                       index_line.mode,
                                       index_line.mgit_type,

@@ -9,7 +9,7 @@ impl Command for CatFileCommand {
         let _content_flag = input_iterator.next().expect("missing content flag");
         let sha1 = input_iterator.next().expect("missing object sha1");
         let reflated_contents = get_reflated_contents(&sha1);
-        println!("\n{}", reflated_contents);
+        println!("{}", reflated_contents);
         "".to_string()
     }
 }

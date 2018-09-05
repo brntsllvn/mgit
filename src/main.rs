@@ -10,5 +10,5 @@ fn main() {
     let _filepath= args.next();
     let command = commands::get_command(args.next());
     let result = command.execute(args.collect());
-    println!("\n{}\n", result);
+    println!("{}", result);
 }

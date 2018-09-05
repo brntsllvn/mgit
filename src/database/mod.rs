@@ -106,6 +106,7 @@ fn store_deflated_contents(sha1: &str, bytes: Vec<u8>) {
 pub fn print_commit_history() {
     let head_sha1 = fs::read_to_string(MASTER_PATH)
         .expect("could not open master path");
+    println!("{}", "-".repeat(47));
     print_history(&head_sha1);
     "".to_string();
 }
