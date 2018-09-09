@@ -19,3 +19,13 @@
 - view ./git/index contents with `xxd ./.git/index`
 - [technical details of git index](https://github.com/git/git/blob/master/Documentation/technical/index-format.txt)
 - view lines of code with `git ls-files | xargs wc -l`
+
+### Make lots of objects
+```sh
+for i in `seq 1 100`;
+do
+    RAND="$(openssl rand -base64 4)"
+    echo ${RAND} > some_file.txt
+    mgit add some_file.txt
+done
+```
