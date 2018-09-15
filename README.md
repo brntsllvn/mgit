@@ -22,7 +22,7 @@
 
 ### Make lots of objects
 ```sh
-for i in `seq 1 100`;
+for i in `seq 1 1000`;
 do
     RAND="$(openssl rand -base64 4)"
     echo ${RAND} > some_file.txt
